@@ -16,9 +16,16 @@ function example_yaml() {
     console.log(YAML.parse('[ true, false, maybe, null ]'));
 }
 
+const EXAMPLE_MARKDOWN = `
+# Header
+- a
+- **b**
+- *c*
+`;
+
 function example_markdown() {
     const md = new MarkdownIt();
-    console.log(md.render('# Title\n- a\n- b\n- c'));
+    console.log(md.render(EXAMPLE_MARKDOWN));
 }
 
 example_dotenv();
