@@ -8,7 +8,7 @@ import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 
 function example_dotenv() {
     dotenv.config();
-    console.log(process.env.USERNAME);
+    console.log(process.env.WP_USERNAME);
 }
 
 function example_yaml() {
