@@ -33,12 +33,17 @@ const EXAMPLE_HTML = `
 <p>a b c</p>
 <p>d e</p>
 <p>f <strong>strong</strong> g</p>
-`
+`;
 
 function example_linkedom() {
+    const TEXT_NODE = 3;
     const document = (new DOMParser()).parseFromString(EXAMPLE_HTML, 'text/html');
-    document.querySelectorAll('p').forEach(node => {
-        console.log(node.innerText);
+    document.querySelectorAll('p').forEach(nodeP => {
+        for (const node of nodeP.childNodes) {
+            if (node.nodeType == TEXT_NODE) {
+                console.log('[' + node.textContent + ']');
+            }
+        }
     });
 }
 
