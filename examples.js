@@ -19,13 +19,17 @@ function example_yaml() {
 
 const EXAMPLE_MARKDOWN = `
 # Header
+
 - a
 - **b**
 - *c*
+
+<div data-solution="ABC"></div>
 `;
 
 function example_markdown() {
-    const md = new MarkdownIt();
+    const options = { html: true };
+    const md = new MarkdownIt(options);
     console.log(md.render(EXAMPLE_MARKDOWN));
 }
 
@@ -33,18 +37,25 @@ const EXAMPLE_HTML = `
 <p>a b c</p>
 <p>d e</p>
 <p>f <strong>strong</strong> g</p>
+<div data-solution="ABC"></div>
 `;
 
 function example_linkedom() {
     const TEXT_NODE = 3;
-    const document = (new DOMParser()).parseFromString(EXAMPLE_HTML, 'text/html');
+    const document = (new DOMParser()).parseFromString('<html>' + EXAMPLE_HTML + '</html>', 'text/html');
+    // replace text nodes
     document.querySelectorAll('p').forEach(nodeP => {
         for (const node of nodeP.childNodes) {
-            if (node.nodeType == TEXT_NODE) {
-                console.log('[' + node.textContent + ']');
+            if (node.nodeType === TEXT_NODE) {
+                node.textContent = '[' + node.textContent + ']';
             }
         }
     });
+    // replace nodes with specific attributes
+    document.querySelectorAll('div[data-solution]').forEach(nodeDiv => {
+        nodeDiv.innerHTML = '<p>Yay</p>';
+    });
+    console.log(document.documentElement.innerHTML);
 }
 
 example_dotenv();
