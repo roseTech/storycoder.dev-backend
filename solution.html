@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+
+<body>
+    <!-- an example, how a solution is checked, if it is correct or not -->
+    <script>
+        function check(nodeButton) {
+            const nodeParent = nodeButton.parentNode;
+            const isCorrect = nodeParent.children[0].value === nodeParent.getAttribute('data-solution');
+            nodeParent.children[2].innerText = isCorrect ? "Correct! :)" : "Wrong :(";
+        }
+    </script>
+    <div data-solution="3">
+        <input type="text"><button onclick="check(this)">Check</button>
+        <span></span>
+    </div>
+</body>
+
+</html>
