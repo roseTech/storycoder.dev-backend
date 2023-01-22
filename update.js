@@ -89,11 +89,23 @@ function htmlSolution(html) {
     return document.documentElement.innerHTML;
 }
 
+function storyToHtml(story) {
+    const options = { html: true };
+    const md = new MarkdownIt(options);
+    const [frontmatter, markdown] = frontmatterSplit(story);
+    let html = md.render(markdown);
+    // TODO use also DOMParser
+    html = html.replaceAll(/<p>.*?<\/p>/gs, match => {
+        return match.replaceAll('\n', ' ');
+    });
+    html = htmlSolution(html);
+    html = SOLUTION_JS + html;
+    return html;
+}
+
 // go through all stories in the repository a create HTML out of it. This HTML
 // later can be used to upload to e.g. wordpress.
 function repoStoriesList() {
-    const options = { html: true };
-    const md = new MarkdownIt(options);
     return fs.readdirSync(OFFLINE_ROOT).map(folder => {
         const pathStory = path.join(OFFLINE_ROOT, folder, folder + '_Story.md');
         if (!fs.existsSync(pathStory)) {
@@ -101,16 +113,7 @@ function repoStoriesList() {
         }
         const title = folder.replaceAll('_', ' ');
         const story = fs.readFileSync(pathStory, 'utf-8');
-        const [fm, markdown] = frontmatterSplit(story);
-
-        // TODO move the whole generation into a function
-        let html = md.render(markdown);
-        // TODO use also DOMParser
-        html = html.replaceAll(/<p>.*?<\/p>/gs, match => {
-            return match.replaceAll('\n', ' ');
-        });
-        html = htmlSolution(html);
-        html = SOLUTION_JS + html;
+        const html = storyToHtml(story);
         // fs.writeFileSync(pathStory + '.html', html);
         return {
             title: title,
