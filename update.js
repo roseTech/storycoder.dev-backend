@@ -13,6 +13,10 @@ import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 
 import * as wp from './wp.js';
 
+function unique(array) {
+    return array.filter((value, index) => array.indexOf(value) === index);
+}
+
 const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are
 
 // split a markdown document in the frontmatter and the document
@@ -92,6 +96,17 @@ function repoStoriesList() {
     }).filter($ => $); // remove undefined
 }
 
+async function wpCreateTagsIfNotExist(repoStories) {
+    const repoTags = unique(repoStories.map($ => $.tags).flat());
+    const wpTags = (await wp.tagList()).map($ => $.name);
+    for (const repoTag of repoTags) {
+        if (!wpTags.includes(repoTag)) {
+            console.log('Create Tag', repoTag);
+            wp.tagCreate(repoTag);
+        }
+    }
+}
+
 // go through all stories in the repository and create the story on wordpress if
 // it do not already exist.
 async function wpCreateStoriesIfNotExist(repoStories) {
@@ -105,12 +120,12 @@ async function wpCreateStoriesIfNotExist(repoStories) {
     }
 }
 
-async function wpUpdateStories(repoStories) {
+async function wpUpdateStories(repoStories, wpTags) {
     const wpStories = await wp.postList();
     for (const repoStory of repoStories) {
-        const wpStory = wpStories.find($ => $.title.rendered == repoStory.title);
-        const tags = []; // needs to be a list of integers
-        console.log('Update Story', wpStory.title.rendered)
+        const wpStory = wpStories.find($ => $.title.rendered === repoStory.title);
+        const tags = repoStory.tags.map($ => wpTags.find(tag => tag.name === $).id);
+        console.log('Update Story', repoStory.title)
         await wp.postUpdate(wpStory.id, repoStory.html, tags);
     }
 }
@@ -119,8 +134,10 @@ async function main() {
     const repoStories = repoStoriesList();
     //console.log(repoStories.map($ => [$.title, $.tags]));
 
+    await wpCreateTagsIfNotExist(repoStories);
+    const wpTags = await wp.tagList();
     await wpCreateStoriesIfNotExist(repoStories);
-    await wpUpdateStories(repoStories);
+    await wpUpdateStories(repoStories, wpTags);
 }
 
 await main();
