@@ -5,11 +5,11 @@ endeavor.
 */
 
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
-import * as dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
 import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
+import crypto from 'crypto';
 
 import * as wp from './wp.js';
 
@@ -128,6 +128,10 @@ async function wpUpdateStories(repoStories, wpTags) {
         console.log('Update Story', repoStory.title)
         await wp.postUpdate(wpStory.id, repoStory.html, tags);
     }
+}
+
+function checksum(data) {
+    return crypto.createHash('sha256').update(data).digest('hex');
 }
 
 async function main() {

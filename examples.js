@@ -1,8 +1,8 @@
 
 // just short examples for every used libraries
 
-import * as process from 'process';
-import * as dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
+import process from 'process';
+import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
 import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom

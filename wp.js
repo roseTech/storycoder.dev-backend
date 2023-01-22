@@ -1,17 +1,17 @@
-import { assert } from 'console';
-import * as dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
-import * as https from 'https';
-import * as process from 'process';
+import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
+import https from 'https';
+import process from 'process';
+import FormData from 'form-data';
 
 dotenv.config();
 
 const AUTH = process.env.WP_USERNAME + ':' + process.env.WP_PASSWORD;
 
 const URL = 'https://practicecoding.dev';
-
 const URL_POSTS = URL + '/wp-json/wp/v2/posts';
 const URL_TAGS = URL + '/wp-json/wp/v2/tags';
 const URL_CATEGORIES = URL + '/wp-json/wp/v2/categories';
+const URL_MEDIA = URL + '/wp-json/wp/v2/media';
 
 // HTTP GET
 async function get(url) {
@@ -30,7 +30,7 @@ async function get(url) {
 }
 
 async function getMany(url) {
-    const MAX_PAGE = 50;
+    const MAX_PAGE = 1;
     const bodies = [];
     for (let page = 1; page <= MAX_PAGE; page += 1) {
         const body = await get(url + '?per_page=100&page=' + page);
@@ -68,6 +68,33 @@ async function post(url, data) {
     });
 }
 
+async function postImage(url, title, filename, image) {
+    console.log('post ' + url);
+    return new Promise((resolve) => {
+        let responseBody = '';
+        const form = new FormData();
+        form.append('title', title);
+        form.append('file', image, filename);
+        const data = form.getBuffer();
+        const options = {
+            headers: {
+                'Content-Type': form.getHeaders()['content-type'],
+                'Content-Length': data.length,
+            },
+            auth: AUTH,
+            method: 'POST',
+        };
+        const req = https.request(url, options, res => {
+            res.on('data', chunk => responseBody += chunk);
+            res.on('end', () => {
+                resolve(responseBody);
+            });
+        });
+        req.write(data);
+        req.end();
+    });
+}
+
 // https://developer.wordpress.org/rest-api/reference/posts/
 
 // fetch all stories which are currently available
@@ -89,7 +116,7 @@ export async function postCreate(title) {
 // content: string
 // tags: array of integers
 export async function postUpdate(id, content, tags) {
-    const body = await post(URL_POSTS + '/' + id, { content: content, tags: [tags], status: 'publish' });
+    const body = await post(URL_POSTS + '/' + id, { content: content, tags: tags, status: 'publish' });
     //console.log(body);
 }
 
@@ -113,4 +140,15 @@ export async function tagCreate(name) {
 export async function categoryList() {
     const body = await get(URL_CATEGORIES);
     return body;
+}
+
+// https://developer.wordpress.org/rest-api/reference/media/
+
+export async function mediaList() {
+    const body = await getMany(URL_MEDIA);
+    return body;
+}
+
+export async function mediaCreate(title, filename, image) {
+    const body = await postImage(URL_MEDIA, title, filename, image);
 }
