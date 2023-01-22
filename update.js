@@ -4,59 +4,16 @@ Warning: This is just a prototype, do not use/copy this code for any serious
 endeavor.
 */
 
-import * as https from 'https';
+import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
+import * as dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import * as fs from 'fs';
 import * as path from 'path';
-import * as process from 'process';
-import * as dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
-import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
+import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 
-dotenv.config();
+import * as wp from './wp.js';
 
-const AUTH = process.env.WP_USERNAME + ':' + process.env.WP_PASSWORD;
-const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are 
-const ONLINE_URL = 'https://practicecoding.dev/wp-json/wp/v2/posts';
-
-// HTTP GET
-async function get(url) {
-    console.log('get ' + url);
-    return new Promise((resolve) => {
-        let responseBody = '';
-        const options = {};
-        https.get(url, options, res => {
-            res.on('data', chunk => responseBody += chunk);
-            res.on('end', () => {
-                resolve(responseBody);
-            });
-        });
-    });
-}
-
-// HTTP POST
-async function post(url, data) {
-    console.log('post ' + url);
-    const requestBody = JSON.stringify(data);
-    return new Promise((resolve) => {
-        let responseBody = '';
-        const options = {
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(requestBody),
-            },
-            auth: AUTH,
-            method: 'POST',
-        };
-        const req = https.request(url, options, res => {
-            res.on('data', chunk => responseBody += chunk);
-            res.on('end', () => {
-                resolve(JSON.parse(responseBody));
-            });
-        });
-        req.write(requestBody);
-        req.end();
-    });
-}
+const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are
 
 // split a markdown document in the frontmatter and the document
 // https://jekyllrb.com/docs/front-matter/
@@ -81,26 +38,37 @@ function check(nodeButton) {
 const SOLUTION_HTML = '<input type="text"><button onclick="check(this)">Check</button> <span></span>';
 
 // replace every <div data-solution="..."><div> with HTML
-function htmlSolution(html) {
-    const document = (new DOMParser()).parseFromString('<html>' + html + '</html>', 'text/html');
+function htmlSolution(document) {
     document.querySelectorAll('div[data-solution]').forEach(nodeDiv => {
         nodeDiv.innerHTML = SOLUTION_HTML;
     });
-    return document.documentElement.innerHTML;
 }
 
-function storyToHtml(story) {
+function htmlParagraphNewLine(document) {
+    document.querySelectorAll('p').forEach(node => {
+        node.innerHTML = node.innerHTML.replaceAll('\n', ' ');
+    });
+}
+
+function storyParse(story) {
     const options = { html: true };
     const md = new MarkdownIt(options);
-    const [frontmatter, markdown] = frontmatterSplit(story);
-    let html = md.render(markdown);
-    // TODO use also DOMParser
-    html = html.replaceAll(/<p>.*?<\/p>/gs, match => {
-        return match.replaceAll('\n', ' ');
-    });
-    html = htmlSolution(html);
-    html = SOLUTION_JS + html;
-    return html;
+    const [frontmatterString, markdown] = frontmatterSplit(story);
+    const document = (new DOMParser()).parseFromString('<html>' + md.render(markdown) + '</html>', 'text/html');
+    htmlParagraphNewLine(document);
+    htmlSolution(document);
+    const html = SOLUTION_JS + document.documentElement.innerHTML;
+    const frontmatter = YAML.parse(frontmatterString);
+    return [html, frontmatter];
+}
+
+function frontmatterTags(frontmatter) {
+    function split(key) {
+        const value = frontmatter[key];
+        return value === null ? [] : frontmatter[key].split(',').map($ => $.trim().toLowerCase()).filter($ => $.length > 1);
+    }
+    const tags = [].concat(split('Category'), split('Story Content'), split('Story Genre'), split('Coding Level'), split('Coding Ideas'));
+    return tags;
 }
 
 // go through all stories in the repository a create HTML out of it. This HTML
@@ -113,72 +81,46 @@ function repoStoriesList() {
         }
         const title = folder.replaceAll('_', ' ');
         const story = fs.readFileSync(pathStory, 'utf-8');
-        const html = storyToHtml(story);
-        // fs.writeFileSync(pathStory + '.html', html);
+        const [html, frontmatter] = storyParse(story);
+        const tags = frontmatterTags(frontmatter);
+        fs.writeFileSync(pathStory + '.html', html);
         return {
             title: title,
-            path: pathStory,
             html: html,
+            tags: tags,
         };
-    }).filter($ => $);
-}
-
-// fetch all stories which are currently available on wordpress
-async function wpStoriesList(fetchOnline) {
-    if (fetchOnline) {
-        const result = await get(ONLINE_URL + '?per_page=50');
-        // writing the result to a file is just helpful for debugging
-        fs.writeFileSync('stories.json', result)
-    }
-    const data = fs.readFileSync('stories.json');
-    const json = JSON.parse(data);
-    return json;
-}
-
-// create a new story on wordpress
-async function wpStoriesCreate(title) {
-    const resultCreate = await post(ONLINE_URL, { title: title });
-    if (resultCreate.id === undefined) {
-        console.error(resultCreate);
-    }
-    const resultPublish = await post(ONLINE_URL + '/' + resultCreate.id, { status: 'publish' });
-}
-
-// update an existing story on wordpress
-async function wpStoriesUpdate(id, content) {
-    const result = await post(ONLINE_URL + '/' + id, { content: content });
-    //console.log(result);
+    }).filter($ => $); // remove undefined
 }
 
 // go through all stories in the repository and create the story on wordpress if
 // it do not already exist.
-async function createIfNotExist(repoStories, wpStories) {
+async function wpCreateStoriesIfNotExist(repoStories) {
+    const wpStories = await wp.postList();
     const wpTitles = wpStories.map($ => $.title.rendered);
-    for (const story of repoStories) {
-        if (!wpTitles.includes(story.title)) {
-            console.log(story.title);
-            await wpStoriesCreate(story.title);
+    for (const repoStory of repoStories) {
+        if (!wpTitles.includes(repoStory.title)) {
+            console.log('Create Story', repoStory.title);
+            await wp.postCreate(repoStory.title);
         }
     }
 }
 
-async function update(repoStories, wpStories) {
+async function wpUpdateStories(repoStories) {
+    const wpStories = await wp.postList();
     for (const repoStory of repoStories) {
         const wpStory = wpStories.find($ => $.title.rendered == repoStory.title);
-        await wpStoriesUpdate(wpStory.id, repoStory.html);
+        const tags = []; // needs to be a list of integers
+        console.log('Update Story', wpStory.title.rendered)
+        await wp.postUpdate(wpStory.id, repoStory.html, tags);
     }
 }
 
 async function main() {
     const repoStories = repoStoriesList();
-    // create stories on wordpress which do not already exist
-    const wpStoriesBeforeCreate = await wpStoriesList(true);
-    await createIfNotExist(repoStories, wpStoriesBeforeCreate);
-    // update the content of all stories
-    const wpStories = await wpStoriesList(true);
-    await update(repoStories, wpStories);
+    //console.log(repoStories.map($ => [$.title, $.tags]));
 
-    //await wpStoriesUpdate(220, "A&B\"C+D");
+    await wpCreateStoriesIfNotExist(repoStories);
+    await wpUpdateStories(repoStories);
 }
 
 await main();
