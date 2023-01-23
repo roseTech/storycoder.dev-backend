@@ -1,3 +1,5 @@
+// WordPress functions
+
 import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import FormData from 'form-data'; // https://www.npmjs.com/package/form-data
 import https from 'https';

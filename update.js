@@ -1,9 +1,4 @@
 
-/*
-Warning: This is just a prototype, do not use/copy this code for any serious
-endeavor.
-*/
-
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
 import crypto from 'crypto';
 import fs from 'fs';
@@ -21,6 +16,20 @@ function checksum(data) {
     return crypto.createHash('sha256').update(data).digest('hex');
 }
 
+// format('Hello {0}', 'World') -> 'Hello World'
+function formatn(text, ...vars) {
+    return text.replace(/{(\d+)}/g, function (match, number) {
+        return typeof vars[number] === 'undefined' ? match : vars[number];
+    });
+}
+
+// format('Hello {t}', {t: 'World'}) -> 'Hello World'
+function format(text, vars) {
+    return text.replace(/{(\w+)}/g, function (_, match) {
+        return typeof vars[match] === 'undefined' ? match : vars[match];
+    });
+}
+
 const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are
 
 // split a markdown document in the frontmatter and the document
@@ -31,6 +40,38 @@ function frontmatterSplit(text) {
     const markdown = text.slice(match[0].length);
     return [frontmatter, markdown];
 }
+
+const HTML_HEADER = `
+<div class="wp-block-media-text alignfull is-stacked-on-mobile is-vertically-aligned-center">
+    <figure class="wp-block-media-text__media">
+        <img src="https://practicecoding.dev/wp-content/uploads/2023/01/hd-wallpaper-valentine-valentines-day-1953964-1024x682.jpg" class="wp-image-389 size-full" />
+    </figure>
+    <div class="wp-block-media-text__content">
+        <h1 class="has-text-align-center">{title}</h1>
+        <h2 class="has-text-align-center">
+            <a href="{link}">Code Solutions on GitHub ↗</a>
+        </h2>
+    </div>
+</div>
+<p>&nbsp;</p>
+`;
+
+const HTML_FOOTER = `
+<figure class="wp-block-table is-style-stripes"><table><tbody>
+    <tr><th class="has-text-align-center">Category</th><td>{category}</td></tr>
+    <tr><th class="has-text-align-center">Coding Level</th><td>{codingLevel}</td></tr>
+    <tr><th class="has-text-align-center">Coding Ideas</th><td>{codingIdeas}</td></tr>
+    <tr><th class="has-text-align-center">Coding Languages</th><td><a href="{link}">Code Solutions on GitHub ↗</a></td></tr>
+    <tr><th class="has-text-align-center">Story Genre</th><td>{storyGenre}</td></tr>
+    <tr><th class="has-text-align-center">Story Content Key Words</th><td>{storyContent}</td></tr>
+    <tr><th class="has-text-align-center">Story License</th><td>{storyLicense}</td></tr>
+    <tr><th class="has-text-align-center">How To Quote Story</th><td>({author}, adapted by StoryCoder.dev under {storyLicense})</td></tr>
+    <tr><th class="has-text-align-center">Picture License</th><td>{pictureLicense}</td></tr>
+    <tr><th class="has-text-align-center">How to Quote Picture</th><td>TODO</td></tr>
+    <tr><th class="has-text-align-center">Title</th><td>{title}</td></tr>
+    <tr><th class="has-text-align-center">Author</th><td>{author}</td></tr>
+</tbody></table></figure>
+`
 
 // javascript that is added to every riddle
 const SOLUTION_JS = `
@@ -53,21 +94,38 @@ function htmlSolution(document) {
 }
 
 function htmlParagraphNewLine(document) {
-    document.querySelectorAll('p').forEach(node => {
+    document.querySelectorAll('p, script').forEach(node => {
         node.innerHTML = node.innerHTML.replaceAll('\n', ' ');
     });
 }
 
-function storyParse(story) {
+function storyParse(folder, story) {
     const options = { html: true };
     const md = new MarkdownIt(options);
     const [frontmatterString, markdown] = frontmatterSplit(story);
-    const document = (new DOMParser()).parseFromString('<html>' + md.render(markdown) + '</html>', 'text/html');
+    const frontmatter = YAML.parse(frontmatterString);
+    const link = 'https://github.com/roseTech/storycoder.dev/tree/main/' + folder;
+    const vars = {
+        codingLevel: frontmatter['Coding Level'],
+        codingIdeas: frontmatter['Coding Ideas'],
+        storyGenre: frontmatter['Story Genre'],
+        storyContent: frontmatter['Story Content'],
+        storyLicense: frontmatter['Story License'],
+        pictureLicense: frontmatter['Picture License'],
+        category: frontmatter['Category'],
+        author: frontmatter['Author'],
+        title: frontmatter.Title,
+        link: link
+    };
+    const htmlHeader = format(HTML_HEADER, vars);
+    const htmlFooter = format(HTML_FOOTER, vars);
+    const htmlMarkdown = md.render(markdown);
+    const html = SOLUTION_JS + htmlHeader + htmlMarkdown + htmlFooter;
+    const document = (new DOMParser()).parseFromString('<html>' + html + '</html>', 'text/html');
     htmlParagraphNewLine(document);
     htmlSolution(document);
-    const html = SOLUTION_JS + document.documentElement.innerHTML;
-    const frontmatter = YAML.parse(frontmatterString);
-    return [html, frontmatter];
+    const htmlFixed = document.documentElement.innerHTML;
+    return [htmlFixed, frontmatter];
 }
 
 function frontmatterTags(frontmatter) {
@@ -98,9 +156,9 @@ function repoStoriesList() {
         const imageTitle = checksum(imageFile);
         const title = folder.replaceAll('_', ' ');
         const story = fs.readFileSync(storyFileName, 'utf-8');
-        const [html, frontmatter] = storyParse(story);
+        const [html, frontmatter] = storyParse(folder, story);
         const tags = frontmatterTags(frontmatter);
-        // fs.writeFileSync(storyFileName + '.html', html);
+        //fs.writeFileSync(storyFileName + '.dev.html', html);
         return {
             title: title,
             html: html,
@@ -150,20 +208,20 @@ async function wpCreateStoriesIfNotExist(repoStories) {
 async function wpUpdateStories(repoStories, wpTags) {
     const wpStories = await wp.postList();
     for (const repoStory of repoStories) {
+        console.log('Update Story', repoStory.title)
         const wpStory = wpStories.find($ => $.title.rendered === repoStory.title);
         const tags = repoStory.tags.map($ => wpTags.find(tag => tag.name === $).id);
-        console.log('Update Story', repoStory.title)
         await wp.postUpdate(wpStory.id, repoStory.html, tags);
     }
 }
 
 async function main() {
-    //const repoStories = repoStoriesList();
+    const repoStories = repoStoriesList();
+    //const repoStories = repoStoriesList().slice(0, 5);
     //console.log(repoStories.map($ => [$.title, $.tags]));
 
-    /*
     await wpCreateTagsIfNotExist(repoStories);
-    await wpCreateMediasIfNotExist(repoStories);
+    //await wpCreateMediasIfNotExist(repoStories);
     const wpTags = await wp.tagList();
     const wpMedias = await wp.mediaList();
     await wpCreateStoriesIfNotExist(repoStories);
