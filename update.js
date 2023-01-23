@@ -5,16 +5,20 @@ endeavor.
 */
 
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
-import fs from 'fs';
-import path from 'path';
-import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
-import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 import crypto from 'crypto';
+import fs from 'fs';
+import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
+import path from 'path';
+import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 
 import * as wp from './wp.js';
 
 function unique(array) {
     return array.filter((value, index) => array.indexOf(value) === index);
+}
+
+function checksum(data) {
+    return crypto.createHash('sha256').update(data).digest('hex');
 }
 
 const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are
@@ -79,19 +83,31 @@ function frontmatterTags(frontmatter) {
 // later can be used to upload to e.g. wordpress.
 function repoStoriesList() {
     return fs.readdirSync(OFFLINE_ROOT).map(folder => {
-        const pathStory = path.join(OFFLINE_ROOT, folder, folder + '_Story.md');
-        if (!fs.existsSync(pathStory)) {
+        const storyFileName = path.join(OFFLINE_ROOT, folder, folder + '_Story.md');
+        if (!fs.existsSync(storyFileName)) {
             return undefined;
         }
+        const imageFileName = path.join(OFFLINE_ROOT, folder, folder + '.jpg');
+        /*
+        if (!fs.existsSync(imagePath)) {
+            return undefined;
+        }
+        const imageFile = fs.readFileSync(filename);
+        */
+        const imageFile = '';
+        const imageTitle = checksum(imageFile);
         const title = folder.replaceAll('_', ' ');
-        const story = fs.readFileSync(pathStory, 'utf-8');
+        const story = fs.readFileSync(storyFileName, 'utf-8');
         const [html, frontmatter] = storyParse(story);
         const tags = frontmatterTags(frontmatter);
-        fs.writeFileSync(pathStory + '.html', html);
+        // fs.writeFileSync(storyFileName + '.html', html);
         return {
             title: title,
             html: html,
             tags: tags,
+            imageFileName: imageFileName,
+            imageFile: imageFile,
+            imageTitle: imageTitle,
         };
     }).filter($ => $); // remove undefined
 }
@@ -105,6 +121,17 @@ async function wpCreateTagsIfNotExist(repoStories) {
             wp.tagCreate(repoTag);
         }
     }
+}
+
+async function wpCreateMediasIfNotExist(repoStories) {
+    const wpMedias = await wp.mediaList();
+    //console.log(wpMedias[0]);
+    //console.log(wpMedias[0].guid.rendered);
+
+    //const filename = 'test.png';
+    //const image = fs.readFileSync(filename);
+    //const title = checksum(image);
+    //await wp.mediaCreate(title, title + path.extname(filename), image);
 }
 
 // go through all stories in the repository and create the story on wordpress if
@@ -130,16 +157,15 @@ async function wpUpdateStories(repoStories, wpTags) {
     }
 }
 
-function checksum(data) {
-    return crypto.createHash('sha256').update(data).digest('hex');
-}
-
 async function main() {
-    const repoStories = repoStoriesList();
+    //const repoStories = repoStoriesList();
     //console.log(repoStories.map($ => [$.title, $.tags]));
 
+    /*
     await wpCreateTagsIfNotExist(repoStories);
+    await wpCreateMediasIfNotExist(repoStories);
     const wpTags = await wp.tagList();
+    const wpMedias = await wp.mediaList();
     await wpCreateStoriesIfNotExist(repoStories);
     await wpUpdateStories(repoStories, wpTags);
 }

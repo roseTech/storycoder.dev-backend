@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
+import FormData from 'form-data'; // https://www.npmjs.com/package/form-data
 import https from 'https';
 import process from 'process';
-import FormData from 'form-data';
 
 dotenv.config();
 
@@ -34,7 +34,7 @@ async function getMany(url) {
     const bodies = [];
     for (let page = 1; page <= MAX_PAGE; page += 1) {
         const body = await get(url + '?per_page=100&page=' + page);
-        if (body.length == 0) {
+        if (body.length === 0) {
             break;
         }
         bodies.push(body);
@@ -68,13 +68,13 @@ async function post(url, data) {
     });
 }
 
-async function postImage(url, title, filename, image) {
+async function postImage(url, title, filename, media) {
     console.log('post ' + url);
     return new Promise((resolve) => {
         let responseBody = '';
         const form = new FormData();
         form.append('title', title);
-        form.append('file', image, filename);
+        form.append('file', media, filename);
         const data = form.getBuffer();
         const options = {
             headers: {
@@ -149,6 +149,6 @@ export async function mediaList() {
     return body;
 }
 
-export async function mediaCreate(title, filename, image) {
-    const body = await postImage(URL_MEDIA, title, filename, image);
+export async function mediaCreate(title, filename, media) {
+    const body = await postImage(URL_MEDIA, title, filename, media);
 }

@@ -6,6 +6,7 @@ import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
 import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
+import FormData from 'form-data'; // https://www.npmjs.com/package/form-data
 
 function example_dotenv() {
     dotenv.config();
@@ -58,7 +59,20 @@ function example_linkedom() {
     console.log(document.documentElement.innerHTML);
 }
 
+function example_formdata() {
+    const form = new FormData();
+    form.append('title', 'Hello World');
+    form.append('x', 'this is x');
+    form.append('y', 'this is y');
+
+    console.log(form.getHeaders());
+    console.log(form.getBuffer());
+    console.log(form.getBuffer().length);
+    console.log(form.getBuffer().toString());
+}
+
 example_dotenv();
 example_yaml();
 example_markdown();
 example_linkedom();
+example_formdata();
