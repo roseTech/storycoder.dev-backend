@@ -49,31 +49,38 @@ const HTML_HEADER = `
     <div class="wp-block-media-text__content">
         <h1 class="has-text-align-center">{title}</h1>
         <h2 class="has-text-align-center">
-            <a href="{link}">Code Solutions on GitHub ↗</a>
+            <a href="{linkGitHub}">Code Solutions on GitHub ↗</a>
         </h2>
     </div>
 </div>
 <p>&nbsp;</p>
+<ul>
+    <li><a href="https://www.deepl.com/translator">DeepL Translator ↗</a></li>
+    <li><a href="{linkGoogleTranslate}">Google Translate ↗</a></li>
+</ul>
+<p>&nbsp;</p>
 `;
 
 const HTML_FOOTER = `
+<p>&nbsp;</p>
 <figure class="wp-block-table is-style-stripes"><table><tbody>
     <tr><th class="has-text-align-center">Category</th><td>{category}</td></tr>
     <tr><th class="has-text-align-center">Coding Level</th><td>{codingLevel}</td></tr>
     <tr><th class="has-text-align-center">Coding Ideas</th><td>{codingIdeas}</td></tr>
-    <tr><th class="has-text-align-center">Coding Languages</th><td><a href="{link}">Code Solutions on GitHub ↗</a></td></tr>
+    <tr><th class="has-text-align-center">Coding Languages</th><td><a href="{linkGitHub}">Code Solutions on GitHub ↗</a></td></tr>
     <tr><th class="has-text-align-center">Story Genre</th><td>{storyGenre}</td></tr>
     <tr><th class="has-text-align-center">Story Content Key Words</th><td>{storyContent}</td></tr>
     <tr><th class="has-text-align-center">Story License</th><td>{storyLicense}</td></tr>
     <tr><th class="has-text-align-center">How To Quote Story</th><td>({author}, adapted by StoryCoder.dev under {storyLicense})</td></tr>
-    <tr><th class="has-text-align-center">Picture License</th><td>{pictureLicense}</td></tr>
-    <tr><th class="has-text-align-center">How to Quote Picture</th><td>TODO</td></tr>
+    <tr><th class="has-text-align-center">Picture License</th><td>{imageLicense}</td></tr>
+    <tr><th class="has-text-align-center">How to Quote Picture</th><td>(adapted by StoryCoder.dev under {imageLicense})</td></tr>
     <tr><th class="has-text-align-center">Title</th><td>{title}</td></tr>
     <tr><th class="has-text-align-center">Author</th><td>{author}</td></tr>
 </tbody></table></figure>
 `
 
-// javascript that is added to every riddle
+// javascript that is added to every riddle once
+// TODO add custom javascript to the wordpress header?
 const SOLUTION_JS = `
 <script>
 function check(nodeButton) {
@@ -104,18 +111,22 @@ function storyParse(folder, story) {
     const md = new MarkdownIt(options);
     const [frontmatterString, markdown] = frontmatterSplit(story);
     const frontmatter = YAML.parse(frontmatterString);
-    const link = 'https://github.com/roseTech/storycoder.dev/tree/main/' + folder;
+    const linkGitHub = 'https://github.com/roseTech/storycoder.dev/tree/main/' + folder;
+    const linkGoogleTranslateStory = folder.replaceAll('_', '-').toLowerCase();
+    const linkGoogleTranslate = 'https://practicecoding-dev.translate.goog/' + linkGoogleTranslateStory + '/?_x_tr_sl=auto&_x_tr_tl=en';
     const vars = {
         codingLevel: frontmatter['Coding Level'],
         codingIdeas: frontmatter['Coding Ideas'],
         storyGenre: frontmatter['Story Genre'],
         storyContent: frontmatter['Story Content'],
         storyLicense: frontmatter['Story License'],
-        pictureLicense: frontmatter['Picture License'],
+        imageLicense: frontmatter['Image License'],
+        imageSource: frontmatter['Image Source'],
         category: frontmatter['Category'],
         author: frontmatter['Author'],
         title: frontmatter.Title,
-        link: link
+        linkGitHub: linkGitHub,
+        linkGoogleTranslate: linkGoogleTranslate,
     };
     const htmlHeader = format(HTML_HEADER, vars);
     const htmlFooter = format(HTML_FOOTER, vars);
@@ -145,14 +156,19 @@ function repoStoriesList() {
         if (!fs.existsSync(storyFileName)) {
             return undefined;
         }
-        const imageFileName = path.join(OFFLINE_ROOT, folder, folder + '.jpg');
-        /*
-        if (!fs.existsSync(imagePath)) {
+        const imageFileNameJPG = path.join(OFFLINE_ROOT, folder, folder + '.jpg');
+        const imageFileNamePNG = path.join(OFFLINE_ROOT, folder, folder + '.png');
+        let imageFileName = '';
+        if (fs.existsSync(imageFileNameJPG)) {
+            imageFileName = imageFileNameJPG;
+        }
+        if (fs.existsSync(imageFileNamePNG)) {
+            imageFileName = imageFileNamePNG;
+        }
+        if (imageFileName.length === 0) {
             return undefined;
         }
-        const imageFile = fs.readFileSync(filename);
-        */
-        const imageFile = '';
+        const imageFile = fs.readFileSync(imageFileName);
         const imageTitle = checksum(imageFile);
         const title = folder.replaceAll('_', ' ');
         const story = fs.readFileSync(storyFileName, 'utf-8');
