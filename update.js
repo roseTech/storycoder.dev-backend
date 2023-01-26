@@ -32,9 +32,9 @@ function format(text, vars) {
 
 const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are
 
-// split a markdown document in the frontmatter and the document
+// split a document into the frontmatter part and the markdown part
 // https://jekyllrb.com/docs/front-matter/
-function frontmatterSplit(text) {
+function documentSplit(text) {
     const match = text.match(/\s*---\s*(.*?)\s*---\s*/s);
     const frontmatter = match[1];
     const markdown = text.slice(match[0].length);
@@ -106,10 +106,10 @@ function htmlParagraphNewLine(document) {
     });
 }
 
-function storyCompile(folder, story, imageLink) {
+function storyToHtml(folder, story, imageLink) {
     const options = { html: true };
     const md = new MarkdownIt(options);
-    const [frontmatterString, markdown] = frontmatterSplit(story);
+    const [frontmatterString, markdown] = documentSplit(story);
     const frontmatter = YAML.parse(frontmatterString);
     const linkGitHub = 'https://github.com/roseTech/storycoder.dev/tree/main/' + folder;
     const linkGoogleTranslateStory = folder.replaceAll('_', '-').toLowerCase();
@@ -149,11 +149,25 @@ function frontmatterTags(frontmatter) {
     return tags;
 }
 
+function storyToTtsText(story) {
+    const [frontmatterString, markdown] = documentSplit(story);
+
+    // http://erogol.com/ddc-samples/
+
+    let text = markdown;
+    text = text.replace(/<div.*?div>/g, '');
+    text = text.replace(/[^a-zA-Z0-9$!?',:%\+\-\.\n ]/g, '');
+    text = text.replaceAll('\n', ' ');
+    text = text.replace(/ +/g, ' ');
+
+    return text;
+}
+
 // go through all stories in the repository a create HTML out of it. This HTML
 // later can be used to upload to e.g. wordpress.
 function repoStoriesList() {
     return fs.readdirSync(OFFLINE_ROOT).map(folder => {
-        if (!fs.lstatSync(path.join(OFFLINE_ROOT, folder)).isDirectory()) {
+        if (folder.startsWith('.') || fs.lstatSync(path.join(OFFLINE_ROOT, folder)).isFile()) {
             return undefined;
         }
         const storyFileName = path.join(OFFLINE_ROOT, folder, folder + '_Story.md');
@@ -178,9 +192,11 @@ function repoStoriesList() {
         const story = fs.readFileSync(storyFileName, 'utf-8');
         const imageTitle = checksum(image);
         const imageLink = imageTitle + path.extname(imageFileName);
-        const [html, frontmatter] = storyCompile(folder, story, imageLink);
+        const [html, frontmatter] = storyToHtml(folder, story, imageLink);
+        const ttsText = storyToTtsText(story);
         const tags = frontmatterTags(frontmatter);
         //fs.writeFileSync(storyFileName + '.dev.html', html);
+        //fs.writeFileSync(storyFileName + '.dev.txt', ttsText);
         return {
             title: folder.replaceAll('_', ' '),
             html: html,
