@@ -58,6 +58,9 @@ const HTML_HEADER = `
     <li><a href="https://www.deepl.com/translator">DeepL Translator ↗</a></li>
     <li><a href="{linkGoogleTranslate}">Google Translate ↗</a></li>
 </ul>
+<figure class="wp-block-audio">
+    <audio controls src="https://practicecoding.dev/wp-content/uploads/{ttsLink}"></audio>
+</figure>
 <p>&nbsp;</p>
 `;
 
@@ -106,7 +109,7 @@ function htmlParagraphNewLine(document) {
     });
 }
 
-function storyToHtml(folder, story, imageLink) {
+function storyToHtml(folder, story, imageLink, ttsLink) {
     const options = { html: true };
     const md = new MarkdownIt(options);
     const [frontmatterString, markdown] = documentSplit(story);
@@ -123,6 +126,7 @@ function storyToHtml(folder, story, imageLink) {
         imageLicense: frontmatter['Image License'],
         imageSource: frontmatter['Image Source'],
         imageLink: imageLink,
+        ttsLink: ttsLink,
         category: frontmatter['Category'],
         author: frontmatter['Author'],
         title: frontmatter.Title,
@@ -188,23 +192,36 @@ function repoStoriesList() {
             console.error('Missing Picture:', folder);
             return undefined;
         }
+        const ttsFileName = path.join(OFFLINE_ROOT, folder, folder + '.mp3');
+        if (!fs.existsSync(ttsFileName)) {
+            console.error('Missing TTS MP3:', folder);
+            return undefined;
+        }
         const image = fs.readFileSync(imageFileName);
+        const tts = fs.readFileSync(ttsFileName);
         const story = fs.readFileSync(storyFileName, 'utf-8');
         const imageTitle = checksum(image);
         const imageLink = imageTitle + path.extname(imageFileName);
-        const [html, frontmatter] = storyToHtml(folder, story, imageLink);
+        const ttsTitle = checksum(tts);
+        const ttsLink = ttsTitle + path.extname(ttsFileName);
+        const [html, frontmatter] = storyToHtml(folder, story, imageLink, ttsLink);
         const ttsText = storyToTtsText(story);
         const tags = frontmatterTags(frontmatter);
         //fs.writeFileSync(storyFileName + '.dev.html', html);
-        //fs.writeFileSync(storyFileName + '.dev.txt', ttsText);
+        fs.writeFileSync(storyFileName + '.dev.tts', ttsText);
         return {
             title: folder.replaceAll('_', ' '),
             html: html,
             tags: tags,
             imageFileName: imageFileName,
+            imageTitle: imageTitle,
             imageLink: imageLink,
             image: image,
-            imageTitle: imageTitle,
+            ttsFileName: ttsFileName,
+            ttsTitle: ttsTitle,
+            ttsLink: ttsLink,
+            tts: tts,
+
         };
     }).filter($ => $); // remove undefined
 }
@@ -226,6 +243,10 @@ async function wpCreateMediasIfNotExist(repoStories) {
         if (!wpMediaTitles.includes(repoStory.imageTitle)) {
             console.log('Create Media:', path.basename(repoStory.imageFileName));
             await wp.mediaCreate(repoStory.imageTitle, repoStory.imageLink, repoStory.image);
+        }
+        if (!wpMediaTitles.includes(repoStory.ttsTitle)) {
+            console.log('Create Media:', path.basename(repoStory.ttsFileName));
+            await wp.mediaCreate(repoStory.ttsTitle, repoStory.ttsLink, repoStory.tts);
         }
     }
 }
@@ -258,8 +279,8 @@ async function main() {
     //const repoStories = repoStoriesList().slice(0, 2);
     //console.log(repoStories.map($ => [$.title, $.tags]));
 
-    await wpCreateTagsIfNotExist(repoStories);
     await wpCreateMediasIfNotExist(repoStories);
+    await wpCreateTagsIfNotExist(repoStories);
     const wpTags = await wp.tagList();
     const wpMedias = await wp.mediaList();
     await wpCreateStoriesIfNotExist(repoStories);
