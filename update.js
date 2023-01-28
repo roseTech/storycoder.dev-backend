@@ -86,10 +86,21 @@ const HTML_FOOTER = `
 // TODO add custom javascript to the wordpress header?
 const SOLUTION_JS = `
 <script>
-function check(nodeButton) {
+const answerCorrect = "Correct! :) 👌🥳🎉";
+const answerWrong = "Wrong :( 😇🧶 Try Again";
+
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);                    
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+async function check(nodeButton) {
     const nodeDiv = nodeButton.parentNode;
-    const isCorrect = nodeDiv.children[0].value === nodeDiv.getAttribute('data-solution');
-    nodeDiv.children[2].innerText = isCorrect ? "Correct! :) 👌🥳🎉" : "Wrong :( 😇🧶 Try Again";
+    const isCorrect = await sha256( nodeDiv.children[0].value ) === nodeDiv.getAttribute('data-solution');
+    nodeDiv.children[2].innerText = isCorrect ? answerCorrect : answerWrong;
 }
 </script>
 `;
