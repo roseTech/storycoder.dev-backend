@@ -105,8 +105,6 @@ export async function postList() {
     return body;
 }
 
-// create a new story
-//
 // title: string
 export async function postCreate(title) {
     const body = await post(URL_POSTS, { title: title, status: 'publish' });
@@ -114,8 +112,6 @@ export async function postCreate(title) {
     //console.log(body);
 }
 
-// update an existing story
-//
 // id: integer
 // content: string
 // tags: array of integers
