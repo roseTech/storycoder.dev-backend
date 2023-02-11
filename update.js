@@ -63,7 +63,7 @@ function repoStoriesList() {
             tts: tts,
 
         };
-    }).filter($ => $); // remove undefined
+    }).filter(functions.notUndefined);
 }
 
 async function wpCreateTagsIfNotExist(repoStories) {
@@ -92,7 +92,7 @@ async function wpCreateMediasIfNotExist(repoStories) {
 }
 
 // go through all stories in the repository and create the story on wordpress if
-// it do not already exist.
+// it does not already exist.
 async function wpCreateStoriesIfNotExist(repoStories) {
     const wpStories = await wp.postList();
     const wpTitles = wpStories.map($ => $.title.rendered);
