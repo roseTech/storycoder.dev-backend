@@ -47,7 +47,7 @@ function repoStoriesList() {
         const ttsLink = ttsTitle + path.extname(ttsFileName);
         const storyOutput = story.convert(folder, storyText, imageLink, ttsLink);
         const ttsText = storyOutput.ttsText;
-        //fs.writeFileSync(storyFileName + '.dev.html', storyOutput.html);
+        fs.writeFileSync(storyFileName + '.dev.html', storyOutput.html);
         fs.writeFileSync(storyFileName + '.dev.tts', ttsText);
         return {
             title: folder.replaceAll('_', ' '),

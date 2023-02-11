@@ -3,6 +3,7 @@
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
 import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
 import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
+import * as functions from './functions.js';
 
 // format('Hello {0}', 'World') -> 'Hello World'
 function formatn(text, ...vars) {
@@ -76,16 +77,16 @@ const answerCorrect = "Correct! :) 👌🥳🎉";
 const answerWrong = "Wrong :( 😇🧶 Try Again";
 
 async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);                    
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const messageBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', messageBuffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const hashHex = hashArray.map($ => $.toString(16).padStart(2, '0')).join('');
     return hashHex;
 }
 
 async function check(nodeButton) {
     const nodeDiv = nodeButton.parentNode;
-    const isCorrect = await sha256( nodeDiv.children[0].value ) === nodeDiv.getAttribute('data-solution');
+    const isCorrect = await sha256(nodeDiv.children[0].value) === nodeDiv.getAttribute('data-solution');
     nodeDiv.children[2].innerText = isCorrect ? answerCorrect : answerWrong;
 }
 </script>
@@ -96,7 +97,7 @@ const SOLUTION_HTML = '<input type="text"><button onclick="check(this)">Check</b
 // replace every <div data-solution="..."><div> with HTML
 function htmlSolution(document) {
     document.querySelectorAll('div[data-solution]').forEach(nodeDiv => {
-        // create checksum
+        nodeDiv.setAttribute('data-solution', functions.checksum(nodeDiv.getAttribute('data-solution')));
         nodeDiv.innerHTML = SOLUTION_HTML;
     });
 }

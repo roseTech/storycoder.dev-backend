@@ -21,26 +21,29 @@ async function get(url) {
     return new Promise((resolve) => {
         let responseBody = '';
         const options = {};
-        https.get(url, options, res => {
-            res.on('data', chunk => responseBody += chunk);
-            res.on('end', () => {
-                // res.statuscode ???
-                resolve(JSON.parse(responseBody));
+        https.get(url, options, response => {
+            response.on('data', chunk => responseBody += chunk);
+            response.on('end', () => {
+                resolve([response, JSON.parse(responseBody)]);
             });
         });
     });
 }
 
 async function getMany(url) {
-    const MAX_PAGE = 1;
+    const MAX_PAGE = 2;
     const bodies = [];
     for (let page = 1; page <= MAX_PAGE; page += 1) {
-        const body = await get(url + '?per_page=100&page=' + page);
-        if (body.length === 0) {
+        const [response, body] = await get(url + '?per_page=100&page=' + page);
+        if (response.statusCode !== 200) {
             break;
         }
         bodies.push(body);
+        if (body.length < 100) {
+            break;
+        }
     }
+    // responses?
     return bodies.flat();
 }
 
@@ -58,15 +61,14 @@ async function post(url, data) {
             auth: AUTH,
             method: 'POST',
         };
-        const req = https.request(url, options, res => {
-            res.on('data', chunk => responseBody += chunk);
-            res.on('end', () => {
-                // res.statuscode ???
-                resolve(JSON.parse(responseBody));
+        const request = https.request(url, options, response => {
+            response.on('data', chunk => responseBody += chunk);
+            response.on('end', () => {
+                resolve([response, JSON.parse(responseBody)]);
             });
         });
-        req.write(requestBody);
-        req.end();
+        request.write(requestBody);
+        request.end();
     });
 }
 
@@ -86,14 +88,14 @@ async function postImage(url, title, filename, media) {
             auth: AUTH,
             method: 'POST',
         };
-        const req = https.request(url, options, res => {
-            res.on('data', chunk => responseBody += chunk);
-            res.on('end', () => {
-                resolve(responseBody);
+        const request = https.request(url, options, response => {
+            response.on('data', chunk => responseBody += chunk);
+            response.on('end', () => {
+                resolve([response, responseBody]);
             });
         });
-        req.write(data);
-        req.end();
+        request.write(data);
+        request.end();
     });
 }
 
@@ -101,13 +103,13 @@ async function postImage(url, title, filename, media) {
 
 // fetch all stories which are currently available
 export async function postList() {
-    const body = await get(URL_POSTS + '?per_page=100&page=1');
+    const [response, body] = await get(URL_POSTS + '?per_page=100&page=1');
     return body;
 }
 
 // title: string
 export async function postCreate(title) {
-    const body = await post(URL_POSTS, { title: title, status: 'publish' });
+    const [response, body] = await post(URL_POSTS, { title: title, status: 'publish' });
     // TODO for body.id
     //console.log(body);
 }
@@ -116,7 +118,7 @@ export async function postCreate(title) {
 // content: string
 // tags: array of integers
 export async function postUpdate(id, content, tags) {
-    const body = await post(URL_POSTS + '/' + id, { content: content, tags: tags, status: 'publish' });
+    const [response, body] = await post(URL_POSTS + '/' + id, { content: content, tags: tags, status: 'publish' });
     //console.log(body);
 }
 
@@ -130,15 +132,15 @@ export async function tagList() {
 
 // name: string
 export async function tagCreate(name) {
-    const body = await post(URL_TAGS, { name: name });
+    const [response, body] = await post(URL_TAGS, { name: name });
     //assert(res.statusCode === 201);
-    //console.log(res.statusCode, body);
+    console.log(response.statusCode, body);
 }
 
 // https://developer.wordpress.org/rest-api/reference/categories/
 
 export async function categoryList() {
-    const body = await get(URL_CATEGORIES);
+    const [response, body] = await get(URL_CATEGORIES);
     return body;
 }
 
@@ -150,5 +152,5 @@ export async function mediaList() {
 }
 
 export async function mediaCreate(title, filename, media) {
-    const body = await postImage(URL_MEDIA, title, filename, media);
+    const [response, body] = await postImage(URL_MEDIA, title, filename, media);
 }
