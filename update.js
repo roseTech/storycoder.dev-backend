@@ -8,6 +8,13 @@ import * as functions from './functions.js';
 
 const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are
 
+function mediaRead(fileName) {
+    const content = fs.readFileSync(fileName);
+    const title = functions.checksum(content);
+    const link = title + path.extname(fileName);
+    return { fileName, title, link, content };
+}
+
 // go through all stories in the repository a create HTML out of it. This HTML
 // later can be used to upload to e.g. wordpress.
 function repoStoriesList() {
@@ -34,36 +41,41 @@ function repoStoriesList() {
             logoImageFileName = logoImageFileNamePNG;
         }
         if (logoImageFileName.length === 0) {
-            console.error('Missing Picture:', folder);
+            console.error('Missing Logo Image:', folder);
             return undefined;
         }
-        const logoImage = fs.readFileSync(logoImageFileName);
+
+        const logoImage = mediaRead(logoImageFileName);
 
         const ttsAudioFileName = path.join(OFFLINE_ROOT, folder, folder + '.mp3');
         if (!fs.existsSync(ttsAudioFileName)) {
             console.error('Missing TTS MP3:', folder);
-            return;
+            return undefined;
         }
-        const ttsAudio = fs.readFileSync(ttsAudioFileName);
+        const ttsAudio = mediaRead(ttsAudioFileName);
+
+        const additionalMedias = Object.fromEntries(fs.readdirSync(path.join(OFFLINE_ROOT, folder)).map(fileNameRelative => {
+            const extname = path.extname(fileNameRelative);
+            if ((fileNameRelative == path.basename(logoImageFileName))) {
+                return undefined;
+            }
+            if ((extname !== '.jpg') && (extname !== '.png')) {
+                return undefined;
+            }
+            const fileName = path.join(OFFLINE_ROOT, folder, fileNameRelative);
+            return [fileNameRelative, mediaRead(fileName)];
+        }).filter(functions.notUndefined));
+
+        const medias = { logoImage, ttsAudio, ...additionalMedias };
+
         const tags = story.getTags(storyText);
-        const logoImageTitle = functions.checksum(logoImage);
-        const logoImageLink = logoImageTitle + path.extname(logoImageFileName);
-        const ttsAudioTitle = functions.checksum(ttsAudio);
-        const ttsAudioLink = ttsAudioTitle + path.extname(ttsAudioFileName);
-        const storyHtml = story.toHtml(folder, storyText, logoImageLink, ttsAudioLink);
+        const storyHtml = story.toHtml(folder, storyText, logoImage.link, ttsAudio.link);
         fs.writeFileSync(storyFileName + '.dev.html', storyHtml);
         return {
             title: folder.replaceAll('_', ' '),
             html: storyHtml,
-            tags: tags,
-            logoImageFileName: logoImageFileName,
-            logoImageTitle: logoImageTitle,
-            logoImageLink: logoImageLink,
-            logoImage: logoImage,
-            ttsAudioFileName: ttsAudioFileName,
-            ttsAudioTitle: ttsAudioTitle,
-            ttsAudioLink: ttsAudioLink,
-            ttsAudio: ttsAudio,
+            tags,
+            medias,
         };
     }).filter(functions.notUndefined);
 }
@@ -82,13 +94,11 @@ async function wpCreateTagsIfNotExist(repoStories) {
 async function wpCreateMediasIfNotExist(repoStories) {
     const wpMediaTitles = (await wp.mediaList()).map($ => $.title.rendered);
     for (const repoStory of repoStories) {
-        if (!wpMediaTitles.includes(repoStory.logoImageTitle)) {
-            console.log('Create Media:', path.basename(repoStory.logoImageFileName));
-            await wp.mediaCreate(repoStory.logoImageTitle, repoStory.logoImageLink, repoStory.logoImage);
-        }
-        if (!wpMediaTitles.includes(repoStory.ttsAudioTitle)) {
-            console.log('Create Media:', path.basename(repoStory.ttsAudioFileName));
-            await wp.mediaCreate(repoStory.ttsAudioTitle, repoStory.ttsAudioLink, repoStory.ttsAudio);
+        for (const media of Object.values(repoStory.medias)) {
+            if (!wpMediaTitles.includes(media.title)) {
+                console.log('Create Media:', path.basename(media.fileName));
+                await wp.mediaCreate(media.title, media.link, media.content);
+            }
         }
     }
 }
@@ -121,6 +131,7 @@ async function main() {
     //const repoStories = repoStoriesList().slice(0, 2);
     //console.log(repoStories.map($ => [$.title, $.tags]));
 
+    return;
     await wpCreateMediasIfNotExist(repoStories);
     await wpCreateTagsIfNotExist(repoStories);
     const wpTags = await wp.tagList();
