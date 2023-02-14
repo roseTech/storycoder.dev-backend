@@ -9,7 +9,7 @@ dotenv.config();
 
 const AUTH = process.env.WP_USERNAME + ':' + process.env.WP_PASSWORD;
 
-const URL = 'https://practicecoding.dev';
+const URL = process.env.WP_URL;
 const URL_POSTS = URL + '/wp-json/wp/v2/posts';
 const URL_TAGS = URL + '/wp-json/wp/v2/tags';
 const URL_CATEGORIES = URL + '/wp-json/wp/v2/categories';
@@ -134,7 +134,6 @@ export async function tagList() {
 export async function tagCreate(name) {
     const [response, body] = await post(URL_TAGS, { name: name });
     //assert(res.statusCode === 201);
-    console.log(response.statusCode, body);
 }
 
 // https://developer.wordpress.org/rest-api/reference/categories/

@@ -1,9 +1,16 @@
 // story conversion functions
 
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
+import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
+import process from 'process';
 import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
+
 import * as functions from './functions.js';
+
+dotenv.config();
+
+const URL = process.env.WP_URL;
 
 // format('Hello {0}', 'World') -> 'Hello World'
 function formatn(text, ...vars) {
@@ -23,7 +30,8 @@ function format(text, vars) {
 // https://jekyllrb.com/docs/front-matter/
 function documentSplit(text) {
     const match = text.match(/\s*---\s*(.*?)\s*---\s*/s);
-    const frontmatter = match[1];
+    const frontmatterString = match[1];
+    const frontmatter = YAML.parse(frontmatterString);
     const markdown = text.slice(match[0].length);
     return [frontmatter, markdown];
 }
@@ -31,7 +39,7 @@ function documentSplit(text) {
 const HTML_HEADER = `
 <div class="wp-block-media-text alignfull is-stacked-on-mobile is-vertically-aligned-center">
     <figure class="wp-block-media-text__media">
-        <img src="https://practicecoding.dev/wp-content/uploads/{imageLink}" class="size-full" />
+        <img src="{url}/wp-content/uploads/{imageLink}" class="size-full" />
     </figure>
     <div class="wp-block-media-text__content">
         <h1 class="has-text-align-center">{title}</h1>
@@ -46,7 +54,7 @@ const HTML_HEADER = `
     <li><a href="{linkGoogleTranslate}">Google Translate ↗</a></li>
 </ul>
 <figure class="wp-block-audio">
-    <audio controls src="https://practicecoding.dev/wp-content/uploads/{ttsLink}"></audio>
+    <audio controls src="{url}/wp-content/uploads/{ttsLink}"></audio>
 </figure>
 <p>&nbsp;</p>
 `;
@@ -102,21 +110,22 @@ function htmlSolution(document) {
     });
 }
 
-function htmlParagraphNewLine(document) {
+// WordPress interprets a newline as a new block
+function htmlReplaceNewLine(document) {
     document.querySelectorAll('p, script').forEach(node => {
         node.innerHTML = node.innerHTML.replaceAll('\n', ' ');
     });
 }
 
-function storyToHtml(folder, story, imageLink, ttsLink) {
+export function toHtml(folder, story, imageLink, ttsLink) {
     const options = { html: true };
     const md = new MarkdownIt(options);
-    const [frontmatterString, markdown] = documentSplit(story);
-    const frontmatter = YAML.parse(frontmatterString);
+    const [frontmatter, markdown] = documentSplit(story);
     const linkGitHub = 'https://github.com/roseTech/storycoder.dev/tree/main/' + folder;
     const linkGoogleTranslateStory = folder.replaceAll('_', '-').toLowerCase();
-    const linkGoogleTranslate = 'https://practicecoding-dev.translate.goog/' + linkGoogleTranslateStory + '/?_x_tr_sl=auto&_x_tr_tl=en';
+    const linkGoogleTranslate = URL.replaceAll('.', '-') + '.translate.goog/' + linkGoogleTranslateStory + '/?_x_tr_sl=auto&_x_tr_tl=en';
     const vars = {
+        url: URL,
         codingLevel: frontmatter['Coding Level'],
         codingIdeas: frontmatter['Coding Ideas'],
         storyGenre: frontmatter['Story Genre'],
@@ -137,13 +146,15 @@ function storyToHtml(folder, story, imageLink, ttsLink) {
     const htmlMarkdown = md.render(markdown);
     const html = SOLUTION_JS + htmlHeader + htmlMarkdown + htmlFooter;
     const document = (new DOMParser()).parseFromString('<html>' + html + '</html>', 'text/html');
-    htmlParagraphNewLine(document);
+    htmlReplaceNewLine(document);
     htmlSolution(document);
     const htmlFixed = document.documentElement.innerHTML;
-    return [htmlFixed, frontmatter];
+    return htmlFixed;
 }
 
-function frontmatterTags(frontmatter) {
+export function getTags(story) {
+    const [frontmatter, _] = documentSplit(story);
+
     function split(key) {
         const value = frontmatter[key];
         return value === null ? [] : frontmatter[key].split(',').map($ => $.trim().toLowerCase()).filter($ => $.length > 1);
@@ -152,8 +163,8 @@ function frontmatterTags(frontmatter) {
     return tags;
 }
 
-function storyToTtsText(story) {
-    const [frontmatterString, markdown] = documentSplit(story);
+export function toTtsText(story) {
+    const [_, markdown] = documentSplit(story);
 
     // http://erogol.com/ddc-samples/
 
@@ -164,16 +175,4 @@ function storyToTtsText(story) {
     text = text.replace(/ +/g, ' ');
 
     return text;
-}
-
-export function convert(folder, story, imageLink, ttsLink) {
-    const [html, frontmatter] = storyToHtml(folder, story, imageLink, ttsLink);
-    const ttsText = storyToTtsText(story);
-    const tags = frontmatterTags(frontmatter);
-
-    return {
-        html: html,
-        ttsText: ttsText,
-        tags: tags,
-    }
 }

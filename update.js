@@ -20,6 +20,10 @@ function repoStoriesList() {
             console.error('Missing Story:', folder);
             return undefined;
         }
+        const storyText = fs.readFileSync(storyFileName, 'utf-8');
+        const ttsText = story.toTtsText(storyText);
+        fs.writeFileSync(storyFileName + '.dev.tts', ttsText);
+
         const imageFileNameJPG = path.join(OFFLINE_ROOT, folder, folder + '.jpg');
         const imageFileNamePNG = path.join(OFFLINE_ROOT, folder, folder + '.png');
         let imageFileName = '';
@@ -33,26 +37,25 @@ function repoStoriesList() {
             console.error('Missing Picture:', folder);
             return undefined;
         }
+        const image = fs.readFileSync(imageFileName);
+
         const ttsFileName = path.join(OFFLINE_ROOT, folder, folder + '.mp3');
         if (!fs.existsSync(ttsFileName)) {
             console.error('Missing TTS MP3:', folder);
-            return undefined;
+            return;
         }
-        const image = fs.readFileSync(imageFileName);
         const tts = fs.readFileSync(ttsFileName);
-        const storyText = fs.readFileSync(storyFileName, 'utf-8');
+        const tags = story.getTags(storyText);
         const imageTitle = functions.checksum(image);
         const imageLink = imageTitle + path.extname(imageFileName);
         const ttsTitle = functions.checksum(tts);
         const ttsLink = ttsTitle + path.extname(ttsFileName);
-        const storyOutput = story.convert(folder, storyText, imageLink, ttsLink);
-        const ttsText = storyOutput.ttsText;
-        fs.writeFileSync(storyFileName + '.dev.html', storyOutput.html);
-        fs.writeFileSync(storyFileName + '.dev.tts', ttsText);
+        const storyHtml = story.toHtml(folder, storyText, imageLink, ttsLink);
+        fs.writeFileSync(storyFileName + '.dev.html', storyHtml);
         return {
             title: folder.replaceAll('_', ' '),
-            html: storyOutput.html,
-            tags: storyOutput.tags,
+            html: storyHtml,
+            tags: tags,
             imageFileName: imageFileName,
             imageTitle: imageTitle,
             imageLink: imageLink,
