@@ -74,6 +74,7 @@ const HTML_FOOTER = `
     <tr><th class="has-text-align-center">How to Quote Picture</th><td>(adapted by StoryCoder.dev under {imageLicense})</td></tr>
     <tr><th class="has-text-align-center">Title</th><td>{title}</td></tr>
     <tr><th class="has-text-align-center">Author</th><td>{author}</td></tr>
+    <tr><th class="has-text-align-center">Tags</th><td><!-- wp:post-terms {"term":"post_tag"} /--></td></tr>
 </tbody></table></figure>
 `;
 
