@@ -69,7 +69,7 @@ function repoStoriesList() {
         const medias = { logoImage, ttsAudio, ...additionalMedias };
 
         const tags = story.getTags(storyText);
-        const storyHtml = story.toHtml(folder, storyText, logoImage.link, ttsAudio.link);
+        const storyHtml = story.toHtml(folder, storyText, medias);
         fs.writeFileSync(storyFileName + '.dev.html', storyHtml);
         return {
             title: folder.replaceAll('_', ' '),
@@ -131,7 +131,6 @@ async function main() {
     //const repoStories = repoStoriesList().slice(0, 2);
     //console.log(repoStories.map($ => [$.title, $.tags]));
 
-    return;
     await wpCreateMediasIfNotExist(repoStories);
     await wpCreateTagsIfNotExist(repoStories);
     const wpTags = await wp.tagList();

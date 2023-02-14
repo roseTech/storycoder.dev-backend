@@ -39,7 +39,7 @@ function documentSplit(text) {
 const HTML_HEADER = `
 <div class="wp-block-media-text alignfull is-stacked-on-mobile is-vertically-aligned-center">
     <figure class="wp-block-media-text__media">
-        <img src="{url}/wp-content/uploads/{imageLink}" class="size-full" />
+        <img src="/wp-content/uploads/{imageLink}" class="size-full" />
     </figure>
     <div class="wp-block-media-text__content">
         <h1 class="has-text-align-center">{title}</h1>
@@ -54,7 +54,7 @@ const HTML_HEADER = `
     <li><a href="{linkGoogleTranslate}">Google Translate ↗</a></li>
 </ul>
 <figure class="wp-block-audio">
-    <audio controls src="{url}/wp-content/uploads/{ttsLink}"></audio>
+    <audio controls src="/wp-content/uploads/{ttsLink}"></audio>
 </figure>
 <p>&nbsp;</p>
 `;
@@ -81,8 +81,8 @@ const HTML_FOOTER = `
 // TODO add custom javascript to the wordpress header?
 const SOLUTION_JS = `
 <script>
-const answerCorrect = "Correct! :) 👌🥳🎉";
-const answerWrong = "Wrong :( 😇🧶 Try Again";
+const answerCorrect = 'Correct! :) 👌🥳🎉';
+const answerWrong = 'Wrong :( 😇🧶 Try Again';
 
 async function sha256(message) {
     const messageBuffer = new TextEncoder().encode(message);
@@ -103,21 +103,35 @@ async function check(nodeButton) {
 const SOLUTION_HTML = '<input type="text"><button onclick="check(this)">Check</button> <span></span>';
 
 // replace every <div data-solution="..."><div> with HTML
-function htmlSolution(document) {
+function htmlAdjustSolution(document) {
     document.querySelectorAll('div[data-solution]').forEach(nodeDiv => {
         nodeDiv.setAttribute('data-solution', functions.checksum(nodeDiv.getAttribute('data-solution')));
         nodeDiv.innerHTML = SOLUTION_HTML;
     });
 }
 
+function htmlAdjustLinks(document, medias) {
+    document.querySelectorAll('img').forEach(node => {
+        const linkCurrent = node.getAttribute('src');
+        // TODO ideally all images are handled identically
+        if (linkCurrent.startsWith('/')) {
+            return;
+        }
+        const linkNew = '/wp-content/uploads/' + medias[linkCurrent].link;
+        node.setAttribute('src', linkNew);
+    });
+}
+
 // WordPress interprets a newline as a new block
-function htmlReplaceNewLine(document) {
+function htmlAdjustNewLine(document) {
     document.querySelectorAll('p, script').forEach(node => {
         node.innerHTML = node.innerHTML.replaceAll('\n', ' ');
     });
 }
 
-export function toHtml(folder, story, imageLink, ttsLink) {
+export function toHtml(folder, story, medias) {
+    const imageLink = medias.logoImage.link;
+    const ttsLink = medias.ttsAudio.link;
     const options = { html: true };
     const md = new MarkdownIt(options);
     const [frontmatter, markdown] = documentSplit(story);
@@ -125,7 +139,6 @@ export function toHtml(folder, story, imageLink, ttsLink) {
     const linkGoogleTranslateStory = folder.replaceAll('_', '-').toLowerCase();
     const linkGoogleTranslate = URL.replaceAll('.', '-') + '.translate.goog/' + linkGoogleTranslateStory + '/?_x_tr_sl=auto&_x_tr_tl=en';
     const vars = {
-        url: URL,
         codingLevel: frontmatter['Coding Level'],
         codingIdeas: frontmatter['Coding Ideas'],
         storyGenre: frontmatter['Story Genre'],
@@ -146,8 +159,9 @@ export function toHtml(folder, story, imageLink, ttsLink) {
     const htmlMarkdown = md.render(markdown);
     const html = SOLUTION_JS + htmlHeader + htmlMarkdown + htmlFooter;
     const document = (new DOMParser()).parseFromString('<html>' + html + '</html>', 'text/html');
-    htmlReplaceNewLine(document);
-    htmlSolution(document);
+    htmlAdjustNewLine(document);
+    htmlAdjustSolution(document);
+    htmlAdjustLinks(document, medias);
     const htmlFixed = document.documentElement.innerHTML;
     return htmlFixed;
 }
