@@ -24,47 +24,46 @@ function repoStoriesList() {
         const ttsText = story.toTtsText(storyText);
         fs.writeFileSync(storyFileName + '.dev.tts', ttsText);
 
-        const imageFileNameJPG = path.join(OFFLINE_ROOT, folder, folder + '.jpg');
-        const imageFileNamePNG = path.join(OFFLINE_ROOT, folder, folder + '.png');
-        let imageFileName = '';
-        if (fs.existsSync(imageFileNameJPG)) {
-            imageFileName = imageFileNameJPG;
+        const logoImageFileNameJPG = path.join(OFFLINE_ROOT, folder, folder + '.jpg');
+        const logoImageFileNamePNG = path.join(OFFLINE_ROOT, folder, folder + '.png');
+        let logoImageFileName = '';
+        if (fs.existsSync(logoImageFileNameJPG)) {
+            logoImageFileName = logoImageFileNameJPG;
         }
-        if (fs.existsSync(imageFileNamePNG)) {
-            imageFileName = imageFileNamePNG;
+        if (fs.existsSync(logoImageFileNamePNG)) {
+            logoImageFileName = logoImageFileNamePNG;
         }
-        if (imageFileName.length === 0) {
+        if (logoImageFileName.length === 0) {
             console.error('Missing Picture:', folder);
             return undefined;
         }
-        const image = fs.readFileSync(imageFileName);
+        const logoImage = fs.readFileSync(logoImageFileName);
 
-        const ttsFileName = path.join(OFFLINE_ROOT, folder, folder + '.mp3');
-        if (!fs.existsSync(ttsFileName)) {
+        const ttsAudioFileName = path.join(OFFLINE_ROOT, folder, folder + '.mp3');
+        if (!fs.existsSync(ttsAudioFileName)) {
             console.error('Missing TTS MP3:', folder);
             return;
         }
-        const tts = fs.readFileSync(ttsFileName);
+        const ttsAudio = fs.readFileSync(ttsAudioFileName);
         const tags = story.getTags(storyText);
-        const imageTitle = functions.checksum(image);
-        const imageLink = imageTitle + path.extname(imageFileName);
-        const ttsTitle = functions.checksum(tts);
-        const ttsLink = ttsTitle + path.extname(ttsFileName);
-        const storyHtml = story.toHtml(folder, storyText, imageLink, ttsLink);
+        const logoImageTitle = functions.checksum(logoImage);
+        const logoImageLink = logoImageTitle + path.extname(logoImageFileName);
+        const ttsAudioTitle = functions.checksum(ttsAudio);
+        const ttsAudioLink = ttsAudioTitle + path.extname(ttsAudioFileName);
+        const storyHtml = story.toHtml(folder, storyText, logoImageLink, ttsAudioLink);
         fs.writeFileSync(storyFileName + '.dev.html', storyHtml);
         return {
             title: folder.replaceAll('_', ' '),
             html: storyHtml,
             tags: tags,
-            imageFileName: imageFileName,
-            imageTitle: imageTitle,
-            imageLink: imageLink,
-            image: image,
-            ttsFileName: ttsFileName,
-            ttsTitle: ttsTitle,
-            ttsLink: ttsLink,
-            tts: tts,
-
+            logoImageFileName: logoImageFileName,
+            logoImageTitle: logoImageTitle,
+            logoImageLink: logoImageLink,
+            logoImage: logoImage,
+            ttsAudioFileName: ttsAudioFileName,
+            ttsAudioTitle: ttsAudioTitle,
+            ttsAudioLink: ttsAudioLink,
+            ttsAudio: ttsAudio,
         };
     }).filter(functions.notUndefined);
 }
@@ -83,13 +82,13 @@ async function wpCreateTagsIfNotExist(repoStories) {
 async function wpCreateMediasIfNotExist(repoStories) {
     const wpMediaTitles = (await wp.mediaList()).map($ => $.title.rendered);
     for (const repoStory of repoStories) {
-        if (!wpMediaTitles.includes(repoStory.imageTitle)) {
-            console.log('Create Media:', path.basename(repoStory.imageFileName));
-            await wp.mediaCreate(repoStory.imageTitle, repoStory.imageLink, repoStory.image);
+        if (!wpMediaTitles.includes(repoStory.logoImageTitle)) {
+            console.log('Create Media:', path.basename(repoStory.logoImageFileName));
+            await wp.mediaCreate(repoStory.logoImageTitle, repoStory.logoImageLink, repoStory.logoImage);
         }
-        if (!wpMediaTitles.includes(repoStory.ttsTitle)) {
-            console.log('Create Media:', path.basename(repoStory.ttsFileName));
-            await wp.mediaCreate(repoStory.ttsTitle, repoStory.ttsLink, repoStory.tts);
+        if (!wpMediaTitles.includes(repoStory.ttsAudioTitle)) {
+            console.log('Create Media:', path.basename(repoStory.ttsAudioFileName));
+            await wp.mediaCreate(repoStory.ttsAudioTitle, repoStory.ttsAudioLink, repoStory.ttsAudio);
         }
     }
 }
