@@ -33,9 +33,10 @@ async function get(url) {
         https.get(url, options, response => {
             response.on('data', chunk => responseBody += chunk);
             response.on('end', () => {
-                const body = JSON.parse(responseBody);
-                checkReponse(response, body);
-                resolve(body);
+                resolve([response, JSON.parse(responseBody)]);
+                // const body = JSON.parse(responseBody);
+                // checkReponse(response, body);
+                // resolve(body);
             });
         });
     });
@@ -71,9 +72,10 @@ async function post(url, data) {
         const request = https.request(url, options, response => {
             response.on('data', chunk => responseBody += chunk);
             response.on('end', () => {
-                const body = JSON.parse(responseBody);
-                checkReponse(response, body);
-                resolve(body);
+                resolve([response, JSON.parse(responseBody)]);
+                // const body = JSON.parse(responseBody);
+                // checkReponse(response, body);
+                // resolve(body);
             });
         });
         request.write(requestBody);
@@ -100,7 +102,7 @@ async function postFile(url, title, filename, media) {
         const request = https.request(url, options, response => {
             response.on('data', chunk => responseBody += chunk);
             response.on('end', () => {
-                checkReponse(response, responseBody);
+                // checkReponse(response, responseBody);
                 resolve([response, responseBody]);
             });
         });
