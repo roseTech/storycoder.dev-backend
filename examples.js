@@ -7,6 +7,11 @@ import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-
 import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
 import FormData from 'form-data'; // https://www.npmjs.com/package/form-data
+import http2 from 'http2';
+
+function example_http2() {
+    console.log(http2.constants.HTTP_STATUS_OK);
+}
 
 function example_dotenv() {
     dotenv.config();
@@ -71,6 +76,7 @@ function example_formdata() {
     console.log(form.getBuffer().toString());
 }
 
+example_http2();
 example_dotenv();
 example_yaml();
 example_markdown();
