@@ -6,8 +6,7 @@ import * as wp from './wp.js';
 import * as story from './story.js';
 import * as functions from './functions.js';
 
-// set STORIES_ROOT to './storycoder.dev' in repository variables
-const STORIES_ROOT = process.env.STORIES_ROOT || '../storycoder.dev'; // the path were the stories are
+const STORIES_ROOT = process.env.STORIES_ROOT; // the path were the stories are
 
 function mediaRead(fileName) {
     const content = fs.readFileSync(fileName);
@@ -93,7 +92,7 @@ async function wpCreateTagsIfNotExist(repoStories) {
 }
 
 async function wpCreateMediasIfNotExist(repoStories) {
-    const wpMediaTitles = (await wp.mediaList()).map($ => $.title?.rendered);
+    const wpMediaTitles = (await wp.mediaList()).map($ => $.title.rendered);
     for (const repoStory of repoStories) {
         for (const media of Object.values(repoStory.medias)) {
             if (!wpMediaTitles.includes(media.title)) {
@@ -108,7 +107,7 @@ async function wpCreateMediasIfNotExist(repoStories) {
 // it does not already exist.
 async function wpCreateStoriesIfNotExist(repoStories) {
     const wpStories = await wp.postList();
-    const wpTitles = wpStories.map($ => $.title?.rendered);
+    const wpTitles = wpStories.map($ => $.title.rendered);
     for (const repoStory of repoStories) {
         if (!wpTitles.includes(repoStory.title)) {
             console.log('Create Story:', repoStory.title);
@@ -120,11 +119,10 @@ async function wpCreateStoriesIfNotExist(repoStories) {
 async function wpUpdateStories(repoStories, wpTags) {
     const wpStories = await wp.postList();
     for (const repoStory of repoStories) {
-        const wpStory = wpStories.find($ => !!$.title?.rendered && $.title.rendered === repoStory.title);
-        const tags = repoStory.tags.map($ => wpTags.find(tag => tag.name === $)?.id);
-        if(wpStory?.id) {
-            await wp.postUpdate(wpStory.id, repoStory.html, tags);
-        }
+        console.log('Update Story:', repoStory.title)
+        const wpStory = wpStories.find($ => $.title.rendered === repoStory.title);
+        const tags = repoStory.tags.map($ => wpTags.find(tag => tag.name === $).id);
+        await wp.postUpdate(wpStory.id, repoStory.html, tags);
     }
 }
 
