@@ -6,7 +6,7 @@ import * as wp from './wp.js';
 import * as story from './story.js';
 import * as functions from './functions.js';
 
-// set STORIES_ROOT to './storycoder.dev' for github action
+// set STORIES_ROOT to './storycoder.dev' in repository variables
 const STORIES_ROOT = process.env.STORIES_ROOT || '../storycoder.dev'; // the path were the stories are
 
 function mediaRead(fileName) {
@@ -93,7 +93,7 @@ async function wpCreateTagsIfNotExist(repoStories) {
 }
 
 async function wpCreateMediasIfNotExist(repoStories) {
-    const wpMediaTitles = (await wp.mediaList()).map($ => $.title?.rendered).filter(title => !!title);
+    const wpMediaTitles = (await wp.mediaList()).map($ => $.title?.rendered);
     for (const repoStory of repoStories) {
         for (const media of Object.values(repoStory.medias)) {
             if (!wpMediaTitles.includes(media.title)) {
@@ -108,7 +108,7 @@ async function wpCreateMediasIfNotExist(repoStories) {
 // it does not already exist.
 async function wpCreateStoriesIfNotExist(repoStories) {
     const wpStories = await wp.postList();
-    const wpTitles = wpStories.map($ => $.title?.rendered).filter(title => !!title);
+    const wpTitles = wpStories.map($ => $.title?.rendered);
     for (const repoStory of repoStories) {
         if (!wpTitles.includes(repoStory.title)) {
             console.log('Create Story:', repoStory.title);
