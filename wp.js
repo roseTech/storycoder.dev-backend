@@ -4,16 +4,25 @@ import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import FormData from 'form-data'; // https://www.npmjs.com/package/form-data
 import https from 'https';
 import process from 'process';
+import http2 from 'http2';
 
 dotenv.config();
 
-const AUTH = process.env.WP_USERNAME + ':' + process.env.WP_PASSWORD;
+const AUTH = process.env.WP_API_USERNAME + ':' + process.env.WP_API_PASSWORD;
 
 const URL = process.env.WP_URL;
 const URL_POSTS = URL + '/wp-json/wp/v2/posts';
 const URL_TAGS = URL + '/wp-json/wp/v2/tags';
 const URL_CATEGORIES = URL + '/wp-json/wp/v2/categories';
 const URL_MEDIA = URL + '/wp-json/wp/v2/media';
+
+function checkReponse(response, body) {
+    const isOk = response.statusCode === http2.constants.HTTP_STATUS_OK;
+    const isCreated = response.statusCode === http2.constants.HTTP_STATUS_CREATED;
+    if (!(isOk || isCreated)) {
+        throw 'Invalid Response ' + response.statusCode + ' ' + JSON.stringify(body);
+    }
+}
 
 // HTTP GET
 async function get(url) {
@@ -24,26 +33,24 @@ async function get(url) {
         https.get(url, options, response => {
             response.on('data', chunk => responseBody += chunk);
             response.on('end', () => {
-                resolve([response, JSON.parse(responseBody)]);
+                const body = JSON.parse(responseBody);
+                checkReponse(response, body);
+                resolve(body);
             });
         });
     });
 }
 
 async function getMany(url) {
-    const MAX_PAGE = 2;
+    const MAX_PAGE = 10;
     const bodies = [];
     for (let page = 1; page <= MAX_PAGE; page += 1) {
-        const [response, body] = await get(url + '?per_page=100&page=' + page);
-        if (response.statusCode !== 200) {
-            break;
-        }
+        const body = await get(url + '?per_page=100&page=' + page);
         bodies.push(body);
         if (body.length < 100) {
             break;
         }
     }
-    // responses?
     return bodies.flat();
 }
 
@@ -64,7 +71,9 @@ async function post(url, data) {
         const request = https.request(url, options, response => {
             response.on('data', chunk => responseBody += chunk);
             response.on('end', () => {
-                resolve([response, JSON.parse(responseBody)]);
+                const body = JSON.parse(responseBody);
+                checkReponse(response, body);
+                resolve(body);
             });
         });
         request.write(requestBody);
@@ -72,7 +81,7 @@ async function post(url, data) {
     });
 }
 
-async function postImage(url, title, filename, media) {
+async function postFile(url, title, filename, media) {
     console.log('post ' + url);
     return new Promise((resolve) => {
         let responseBody = '';
@@ -91,6 +100,7 @@ async function postImage(url, title, filename, media) {
         const request = https.request(url, options, response => {
             response.on('data', chunk => responseBody += chunk);
             response.on('end', () => {
+                checkReponse(response, responseBody);
                 resolve([response, responseBody]);
             });
         });
@@ -103,43 +113,38 @@ async function postImage(url, title, filename, media) {
 
 // fetch all stories which are currently available
 export async function postList() {
-    const [response, body] = await get(URL_POSTS + '?per_page=100&page=1');
+    const body = await get(URL_POSTS + '?per_page=100&page=1');
     return body;
 }
 
 // title: string
 export async function postCreate(title) {
-    const [response, body] = await post(URL_POSTS, { title: title, status: 'publish' });
-    // TODO for body.id
-    //console.log(body);
+    const body = await post(URL_POSTS, { title: title, status: 'publish' });
 }
 
 // id: integer
 // content: string
 // tags: array of integers
 export async function postUpdate(id, content, tags) {
-    const [response, body] = await post(URL_POSTS + '/' + id, { content: content, tags: tags, status: 'publish' });
-    //console.log(body);
+    const body = await post(URL_POSTS + '/' + id, { content: content, tags: tags, status: 'publish' });
 }
 
 // https://developer.wordpress.org/rest-api/reference/tags/
 
 export async function tagList() {
     const body = await getMany(URL_TAGS);
-    //assert(res.statusCode === 200);
     return body;
 }
 
 // name: string
 export async function tagCreate(name) {
-    const [response, body] = await post(URL_TAGS, { name: name });
-    //assert(res.statusCode === 201);
+    const body = await post(URL_TAGS, { name: name });
 }
 
 // https://developer.wordpress.org/rest-api/reference/categories/
 
 export async function categoryList() {
-    const [response, body] = await get(URL_CATEGORIES);
+    const body = await get(URL_CATEGORIES);
     return body;
 }
 
@@ -151,5 +156,5 @@ export async function mediaList() {
 }
 
 export async function mediaCreate(title, filename, media) {
-    const [response, body] = await postImage(URL_MEDIA, title, filename, media);
+    const body = await postFile(URL_MEDIA, title, filename, media);
 }

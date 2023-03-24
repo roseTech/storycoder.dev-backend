@@ -86,7 +86,7 @@ async function wpCreateTagsIfNotExist(repoStories) {
     for (const repoTag of repoTags) {
         if (!wpTags.includes(repoTag)) {
             console.log('Create Tag:', repoTag);
-            wp.tagCreate(repoTag);
+            await wp.tagCreate(repoTag);
         }
     }
 }
