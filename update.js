@@ -6,7 +6,8 @@ import * as wp from './wp.js';
 import * as story from './story.js';
 import * as functions from './functions.js';
 
-const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are
+// set STORIES_ROOT to './storycoder.dev' in repository variables
+const STORIES_ROOT = process.env.STORIES_ROOT || '../storycoder.dev'; // the path were the stories are
 
 function mediaRead(fileName) {
     const content = fs.readFileSync(fileName);
@@ -18,11 +19,11 @@ function mediaRead(fileName) {
 // go through all stories in the repository a create HTML out of it. This HTML
 // later can be used to upload to e.g. wordpress.
 function repoStoriesList() {
-    return fs.readdirSync(OFFLINE_ROOT).map(folder => {
-        if (folder.startsWith('.') || fs.lstatSync(path.join(OFFLINE_ROOT, folder)).isFile()) {
+    return fs.readdirSync(STORIES_ROOT).map(folder => {
+        if (folder.startsWith('.') || fs.lstatSync(path.join(STORIES_ROOT, folder)).isFile()) {
             return undefined;
         }
-        const storyFileName = path.join(OFFLINE_ROOT, folder, folder + '_Story.md');
+        const storyFileName = path.join(STORIES_ROOT, folder, folder + '_Story.md');
         if (!fs.existsSync(storyFileName)) {
             console.error('Missing Story:', folder);
             return undefined;
@@ -31,8 +32,8 @@ function repoStoriesList() {
         const ttsText = story.toTtsText(storyText);
         fs.writeFileSync(storyFileName + '.dev.tts', ttsText);
 
-        const logoImageFileNameJPG = path.join(OFFLINE_ROOT, folder, folder + '.jpg');
-        const logoImageFileNamePNG = path.join(OFFLINE_ROOT, folder, folder + '.png');
+        const logoImageFileNameJPG = path.join(STORIES_ROOT, folder, folder + '.jpg');
+        const logoImageFileNamePNG = path.join(STORIES_ROOT, folder, folder + '.png');
         let logoImageFileName = '';
         if (fs.existsSync(logoImageFileNameJPG)) {
             logoImageFileName = logoImageFileNameJPG;
@@ -47,14 +48,14 @@ function repoStoriesList() {
 
         const logoImage = mediaRead(logoImageFileName);
 
-        const ttsAudioFileName = path.join(OFFLINE_ROOT, folder, folder + '.mp3');
+        const ttsAudioFileName = path.join(STORIES_ROOT, folder, folder + '.mp3');
         if (!fs.existsSync(ttsAudioFileName)) {
             console.error('Missing TTS MP3:', folder);
             return undefined;
         }
         const ttsAudio = mediaRead(ttsAudioFileName);
 
-        const additionalMedias = Object.fromEntries(fs.readdirSync(path.join(OFFLINE_ROOT, folder)).map(fileNameRelative => {
+        const additionalMedias = Object.fromEntries(fs.readdirSync(path.join(STORIES_ROOT, folder)).map(fileNameRelative => {
             const extname = path.extname(fileNameRelative);
             if ((fileNameRelative == path.basename(logoImageFileName))) {
                 return undefined;
@@ -62,7 +63,7 @@ function repoStoriesList() {
             if ((extname !== '.jpg') && (extname !== '.png')) {
                 return undefined;
             }
-            const fileName = path.join(OFFLINE_ROOT, folder, fileNameRelative);
+            const fileName = path.join(STORIES_ROOT, folder, fileNameRelative);
             return [fileNameRelative, mediaRead(fileName)];
         }).filter(functions.notUndefined));
 
@@ -92,7 +93,7 @@ async function wpCreateTagsIfNotExist(repoStories) {
 }
 
 async function wpCreateMediasIfNotExist(repoStories) {
-    const wpMediaTitles = (await wp.mediaList()).map($ => $.title.rendered);
+    const wpMediaTitles = (await wp.mediaList()).map($ => $.title?.rendered);
     for (const repoStory of repoStories) {
         for (const media of Object.values(repoStory.medias)) {
             if (!wpMediaTitles.includes(media.title)) {
@@ -107,7 +108,7 @@ async function wpCreateMediasIfNotExist(repoStories) {
 // it does not already exist.
 async function wpCreateStoriesIfNotExist(repoStories) {
     const wpStories = await wp.postList();
-    const wpTitles = wpStories.map($ => $.title.rendered);
+    const wpTitles = wpStories.map($ => $.title?.rendered);
     for (const repoStory of repoStories) {
         if (!wpTitles.includes(repoStory.title)) {
             console.log('Create Story:', repoStory.title);
@@ -119,10 +120,11 @@ async function wpCreateStoriesIfNotExist(repoStories) {
 async function wpUpdateStories(repoStories, wpTags) {
     const wpStories = await wp.postList();
     for (const repoStory of repoStories) {
-        console.log('Update Story:', repoStory.title)
-        const wpStory = wpStories.find($ => $.title.rendered === repoStory.title);
-        const tags = repoStory.tags.map($ => wpTags.find(tag => tag.name === $).id);
-        await wp.postUpdate(wpStory.id, repoStory.html, tags);
+        const wpStory = wpStories.find($ => !!$.title?.rendered && $.title.rendered === repoStory.title);
+        const tags = repoStory.tags.map($ => wpTags.find(tag => tag.name === $)?.id);
+        if(wpStory?.id) {
+            await wp.postUpdate(wpStory.id, repoStory.html, tags);
+        }
     }
 }
 
