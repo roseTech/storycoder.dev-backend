@@ -6,7 +6,7 @@ import * as wp from './wp.js';
 import * as story from './story.js';
 import * as functions from './functions.js';
 
-const OFFLINE_ROOT = '../storycoder.dev'; // the path were the stories are
+const OFFLINE_ROOT = './storycoder.dev'; // the path were the stories are
 
 function mediaRead(fileName) {
     const content = fs.readFileSync(fileName);
