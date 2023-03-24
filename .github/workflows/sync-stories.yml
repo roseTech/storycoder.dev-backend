@@ -35,7 +35,7 @@ jobs:
       - name: Run update
         run: npm run update
         env:
-              WP_URL: ${{ secrets.WP_URL }}
+              WP_URL: ${{ vars.WP_URL }}
               WP_API_USERNAME: ${{ secrets.WP_API_USERNAME }}
               WP_API_PASSWORD: ${{ secrets.WP_API_PASSWORD}}
               STORIES_ROOT: ${{ vars.STORIES_ROOT }}
