@@ -119,10 +119,11 @@ async function wpCreateStoriesIfNotExist(repoStories) {
 async function wpUpdateStories(repoStories, wpTags) {
     const wpStories = await wp.postList();
     for (const repoStory of repoStories) {
-        console.log('Update Story:', repoStory.title)
         const wpStory = wpStories.find($ => $.title.rendered === repoStory.title);
-        const tags = repoStory.tags.map($ => wpTags.find(tag => tag.name === $).id);
-        await wp.postUpdate(wpStory.id, repoStory.html, tags);
+        const tags = repoStory.tags.map($ => wpTags.find(tag => tag.name === $)?.id);
+        if(wpStory?.id) {
+            await wp.postUpdate(wpStory.id, repoStory.html, tags);
+        }
     }
 }
 

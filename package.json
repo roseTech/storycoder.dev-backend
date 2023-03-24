@@ -1,5 +1,9 @@
 {
     "type": "module",
+    "scripts": {
+        "examples": "node examples.js",
+        "update": "node update.js"
+    },
     "dependencies": {
         "dotenv": "16.0",
         "form-data": "4.0",
