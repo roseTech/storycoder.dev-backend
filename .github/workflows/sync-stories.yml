@@ -19,11 +19,10 @@ jobs:
       - name: checkout repo content
         uses: actions/checkout@v2 # checkout the repository content to github runner.
       - name: Checkout storycoder.dev repo
+        uses: actions/checkout@v3
         with:
           repository: roseTech/storycoder.dev 
           path: './storycoder.dev'
-      
-      - uses: actions/checkout@v3
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
