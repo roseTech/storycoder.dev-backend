@@ -10,9 +10,10 @@ For more details see also : https://github.com/roseTech/storycoder.dev
 1. Install [nodejs](https://nodejs.org)
 2. Open a terminal/shell a go into the directory where this repository was cloned/copied to
 3. Install all dependencies: `npm install`
-4. Copy the file `template.env` to `.env` and adapt the variables inside (e.g. USERNAME) 
-5. Run the examples script: `node examples.js`
-6. If this works without any problem, update the frontend: `node update.js`
+4. Create an API password within WordPress (/wp-admin/profile.php)
+5. Copy the file `template.env` to `.env` and adapt all the variables inside the `.env` file (use the the API passowrd generated in the previous step)
+6. Run the examples script: `node examples.js`
+7. If this works without any problem, update the frontend: `node update.js`
 
 ## Summary
 
