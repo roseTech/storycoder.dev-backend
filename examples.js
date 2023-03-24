@@ -10,7 +10,7 @@ import FormData from 'form-data'; // https://www.npmjs.com/package/form-data
 
 function example_dotenv() {
     dotenv.config();
-    console.log(process.env.WP_USERNAME);
+    console.log(process.env.WP_API_USERNAME);
 }
 
 function example_yaml() {

@@ -7,7 +7,7 @@ import process from 'process';
 
 dotenv.config();
 
-const AUTH = process.env.WP_USERNAME + ':' + process.env.WP_PASSWORD;
+const AUTH = process.env.WP_API_USERNAME + ':' + process.env.WP_API_PASSWORD;
 
 const URL = process.env.WP_URL;
 const URL_POSTS = URL + '/wp-json/wp/v2/posts';
