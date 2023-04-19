@@ -16,25 +16,25 @@ jobs:
         with:
           repository: roseTech/storycoder.dev 
           path: './storycoder.dev'
-      - name: list directories
-        run: ls -al
-      - name: setup Node.js environment
+      - name: setup node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: '16'
       - name: install dependencies
         run: npm clean-install
+      - name: list directories
+        run: ls -al
       - name: run examples
         run: npm run examples
       - name: API # remove if everything is working as expected
-        run: echo $WP_URL $STORIES_ROOT
+        run: echo URL:$WP_URL STORIES_ROOT:$STORIES_ROOT
         env:
-          WP_URL: ${{ vars.WP_URL }}
+          WP_URL: https://storycoder.dev
           STORIES_ROOT: ${{ vars.STORIES_ROOT }}
       - name: run update
         run: npm run update
         env:
-          WP_URL: ${{ vars.WP_URL }}
+          WP_URL: https://storycoder.dev
           WP_API_USERNAME: ${{ secrets.WP_API_USERNAME }}
           WP_API_PASSWORD: ${{ secrets.WP_API_PASSWORD}}
-          STORIES_ROOT: ${{ vars.STORIES_ROOT }}
+          STORIES_ROOT: storycoder.dev
