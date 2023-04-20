@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: checkout current repo
         uses: actions/checkout@v3
@@ -22,15 +21,8 @@ jobs:
           node-version: '16'
       - name: install dependencies
         run: npm clean-install
-      - name: list directories
-        run: ls -al
       - name: run examples
         run: npm run examples
-      - name: API # remove if everything is working as expected
-        run: echo URL:$WP_URL STORIES_ROOT:$STORIES_ROOT
-        env:
-          WP_URL: https://storycoder.dev
-          STORIES_ROOT: ${{ vars.STORIES_ROOT }}
       - name: run update
         run: npm run update
         env:
