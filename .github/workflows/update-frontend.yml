@@ -34,8 +34,8 @@ jobs:
       - name: run update
         run: npm run update
         env:
-          WP_URL: https://storycoder.dev
-          WP_API_USERNAME: https://practicecoding.dev
+          WP_URL: https://practicecoding.dev
+          WP_API_USERNAME: Thomas
           # just for a test will be removed in an hour (2023-04-20 10:57)
           WP_API_PASSWORD: 5OQF 4JL6 qY8U iZzv 4Jxn YVWQ
           STORIES_ROOT: storycoder.dev
