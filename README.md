@@ -25,6 +25,7 @@ What is `update.js` really doing?
 
 ## Contributors
 
+- https://github.com/haladamateusz
 - https://github.com/toleksa
 
 ## Thoughts
