@@ -1,8 +1,11 @@
 name: Update Frontend
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
+  # run manually
   workflow_dispatch:
+  # timezone UTC
+  schedule:
+    - cron: "0 4 * * *"
 
 jobs:
   build:
@@ -14,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: roseTech/storycoder.dev 
-          path: './storycoder.dev'
+          path: ./storycoder.dev
       - name: setup node.js environment
         uses: actions/setup-node@v3
         with:
