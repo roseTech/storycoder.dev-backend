@@ -28,6 +28,7 @@ jobs:
         run: |
           cd "storycoder.dev"
           echo "NEW_COMMIT_COUNT=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_ENV
+          cd ..
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         if: ${{ env.NEW_COMMIT_COUNT > 0 }}
