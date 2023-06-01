@@ -24,16 +24,24 @@ jobs:
         with:
           repository: roseTech/storycoder.dev 
           path: './storycoder.dev'
+      - name: Get new commits
+        run: |
+          cd "storycoder.dev"
+          echo "NEW_COMMIT_COUNT=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_ENV
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         with:
           node-version: '16'
       - name: Install dependencies
         run: npm ci
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
       - name: Run examples
         run: npm run examples
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
       - name: Run update
         run: npm run update
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         env:
               WP_URL: ${{ vars.WP_URL }}
               WP_API_USERNAME: ${{ secrets.WP_API_USERNAME }}
