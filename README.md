@@ -7,24 +7,25 @@ For more details see also : https://github.com/roseTech/storycoder.dev
 
 ## First Steps
 
-1. Install [nodejs](https://nodejs.org)
+1. Install [nodejs](https://nodejs.org) (tested with Node 16)
 2. Open a terminal/shell a go into the directory where this repository was cloned/copied to
 3. Install all dependencies: `npm install`
 4. Create an API password within WordPress (/wp-admin/profile.php)
-5. Copy the file `template.env` to `.env` and adapt all the variables inside the `.env` file (use the the API passowrd generated in the previous step)
-6. Run the examples script: `node examples.js`
+5. Copy the file `template.env` to `.env` and adapt all the variables inside the `.env` file (use the the API password generated in the previous step)
+6. Run the examples script: `node examples.js` (as long as there is no error, the output does not matter)
 7. If this works without any problem, update the frontend: `node update.js`
 
 ## Summary
 
 What is `update.js` really doing?
 
-- Converts all stories written in Markdown to HTML. To be more precise into a HTML fragment which WordPress understands. Note: WordPress internally stores posts as HTML.
+- Converts all stories written in Markdown to HTML. To be more precise into a HTML fragment which WordPress understands. Note: WordPress internally stores posts as HTML and annotates it with HTML comments.
 - Upload all media files (image, audio, ...) which are referenced by any of stories to WordPress. To not upload media files, which are already uploaded the following is done: The name of all media files is the checksum of the media file itself. WordPress is therefore acts as content adressable store.
-- Create or update all stories and upload the previously generated HTML.
+- Create or update all stories and upload the previously generated HTML, not considering if they have changed or not (at least currently 2023-04-01).
 
 ## Contributors
 
+- https://github.com/haladamateusz
 - https://github.com/toleksa
 
 ## Thoughts

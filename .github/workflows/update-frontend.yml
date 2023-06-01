@@ -1,0 +1,35 @@
+name: Update Frontend
+
+on:
+  # run manually
+  workflow_dispatch:
+  # timezone UTC
+  schedule:
+    - cron: "0 4 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout current repo
+        uses: actions/checkout@v3
+      - name: checkout storycoder.dev repo
+        uses: actions/checkout@v3
+        with:
+          repository: roseTech/storycoder.dev 
+          path: ./storycoder.dev
+      - name: setup node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: install dependencies
+        run: npm clean-install
+      - name: run examples
+        run: npm run examples
+      - name: run update
+        run: npm run update
+        env:
+          WP_URL: https://storycoder.dev
+          WP_API_USERNAME: ${{ secrets.WP_API_USERNAME }}
+          WP_API_PASSWORD: ${{ secrets.WP_API_PASSWORD}}
+          STORIES_ROOT: storycoder.dev
