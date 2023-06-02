@@ -27,10 +27,9 @@ jobs:
       - name: run examples
         run: npm run examples
       - name: check for new commits
+        working-directory: storycoder.dev
         run: |
-          cd "storycoder.dev"
           echo "NEW_COMMIT_COUNT=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_ENV
-          cd ..
       - name: run update
         run: npm run update
         if: ${{ env.NEW_COMMIT_COUNT > 0 }}
