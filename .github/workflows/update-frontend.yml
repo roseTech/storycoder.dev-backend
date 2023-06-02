@@ -21,7 +21,7 @@ jobs:
       - name: setup node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
       - name: install dependencies
         run: npm clean-install
       - name: run examples
