@@ -3,13 +3,9 @@
 import crypto from 'crypto';
 
 export function unique(array) {
-    return array.filter((value, index) => array.indexOf(value) === index);
+  return array.filter((value, index) => array.indexOf(value) === index);
 }
 
 export function checksum(data) {
-    return crypto.createHash('sha256').update(data).digest('hex');
-}
-
-export function notUndefined(any) {
-    return any !== undefined;
+  return crypto.createHash('sha256').update(data).digest('hex');
 }

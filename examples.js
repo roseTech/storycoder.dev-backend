@@ -1,4 +1,3 @@
-
 // just short examples for every used libraries
 
 import process from 'process';
@@ -9,18 +8,18 @@ import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
 import FormData from 'form-data'; // https://www.npmjs.com/package/form-data
 import http2 from 'http2';
 
-function example_http2() {
-    console.log(http2.constants.HTTP_STATUS_OK);
+function exampleHttp() {
+  console.log(http2.constants.HTTP_STATUS_OK);
 }
 
-function example_dotenv() {
-    dotenv.config();
-    console.log(process.env.WP_API_USERNAME);
+function exampleDotenv() {
+  dotenv.config();
+  console.log(process.env.WP_API_USERNAME);
 }
 
-function example_yaml() {
-    console.log(YAML.parse('3.14159'));
-    console.log(YAML.parse('[ true, false, maybe, null ]'));
+function exampleYaml() {
+  console.log(YAML.parse('3.14159'));
+  console.log(YAML.parse('[ true, false, maybe, null ]'));
 }
 
 const EXAMPLE_MARKDOWN = `
@@ -33,10 +32,10 @@ const EXAMPLE_MARKDOWN = `
 <div data-solution="ABC"></div>
 `;
 
-function example_markdown() {
-    const options = { html: true };
-    const md = new MarkdownIt(options);
-    console.log(md.render(EXAMPLE_MARKDOWN));
+function exampleMarkdown() {
+  const options = { html: true };
+  const md = new MarkdownIt(options);
+  console.log(md.render(EXAMPLE_MARKDOWN));
 }
 
 const EXAMPLE_HTML = `
@@ -46,39 +45,39 @@ const EXAMPLE_HTML = `
 <div data-solution="ABC"></div>
 `;
 
-function example_linkedom() {
-    const TEXT_NODE = 3;
-    const document = (new DOMParser()).parseFromString('<html>' + EXAMPLE_HTML + '</html>', 'text/html');
-    // replace text nodes
-    document.querySelectorAll('p').forEach(nodeP => {
-        for (const node of nodeP.childNodes) {
-            if (node.nodeType === TEXT_NODE) {
-                node.textContent = '[' + node.textContent + ']';
-            }
-        }
-    });
-    // replace nodes with specific attributes
-    document.querySelectorAll('div[data-solution]').forEach(nodeDiv => {
-        nodeDiv.innerHTML = '<p>Yay</p>';
-    });
-    console.log(document.documentElement.innerHTML);
+function exampleLinkedDom() {
+  const TEXT_NODE = 3;
+  const document = new DOMParser().parseFromString(`<html>${EXAMPLE_HTML}</html>`, 'text/html');
+  // replace text nodes
+  document.querySelectorAll('p').forEach((nodeP) => {
+    for (const node of nodeP.childNodes) {
+      if (node.nodeType === TEXT_NODE) {
+        node.textContent = `[${node.textContent}]`;
+      }
+    }
+  });
+  // replace nodes with specific attributes
+  document.querySelectorAll('div[data-solution]').forEach((nodeDiv) => {
+    nodeDiv.innerHTML = '<p>Yay</p>';
+  });
+  console.log(document.documentElement.innerHTML);
 }
 
-function example_formdata() {
-    const form = new FormData();
-    form.append('title', 'Hello World');
-    form.append('x', 'this is x');
-    form.append('y', 'this is y');
+function exampleFormData() {
+  const form = new FormData();
+  form.append('title', 'Hello World');
+  form.append('x', 'this is x');
+  form.append('y', 'this is y');
 
-    console.log(form.getHeaders());
-    console.log(form.getBuffer());
-    console.log(form.getBuffer().length);
-    console.log(form.getBuffer().toString());
+  console.log(form.getHeaders());
+  console.log(form.getBuffer());
+  console.log(form.getBuffer().length);
+  console.log(form.getBuffer().toString());
 }
 
-example_http2();
-example_dotenv();
-example_yaml();
-example_markdown();
-example_linkedom();
-example_formdata();
+exampleHttp();
+exampleDotenv();
+exampleYaml();
+exampleMarkdown();
+exampleLinkedDom();
+exampleFormData();
