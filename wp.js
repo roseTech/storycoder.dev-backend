@@ -115,7 +115,7 @@ async function postFile(url, title, filename, media) {
 
 // fetch all stories which are currently available
 export async function postList() {
-  await get(`${URL_POSTS}?per_page=100&page=1`);
+  return get(`${URL_POSTS}?per_page=100&page=1`);
 }
 
 // title: string

@@ -60,6 +60,7 @@ const HTML_FOOTER = `
     <tr><th class="has-text-align-center">Story Genre</th><td>{storyGenre}</td></tr>
     <tr><th class="has-text-align-center">Story Content Key Words</th><td>{storyContent}</td></tr>
     <tr><th class="has-text-align-center">Story License</th><td>{storyLicense}</td></tr>
+    <tr><th class="has-text-align-center">Parental Rating</th><td>{parentalRating}</td></tr>
     <tr><th class="has-text-align-center">How To Quote Story</th><td>({author}, adapted by StoryCoder.dev under {storyLicense})</td></tr>
     <tr><th class="has-text-align-center">Picture License</th><td>{imageLicense}</td></tr>
     <tr><th class="has-text-align-center">How to Quote Picture</th><td>(adapted by StoryCoder.dev under {imageLicense})</td></tr>
@@ -121,6 +122,19 @@ function htmlAdjustNewLine(document) {
   });
 }
 
+function parentalRating(rating) {
+  switch (rating) {
+    case '6+':
+      return '6+ For Everyone';
+    case '12+':
+      return '12+ Parental Guidance Suggested';
+    case '16+':
+      return '16+ Parental Guideance Necessary';
+    default:
+      return 'Not Rated Yet';
+  }
+}
+
 export function toHtml(folder, story, medias) {
   const imageLink = medias.logoImage.link;
   const ttsLink = medias.ttsAudio.link;
@@ -144,6 +158,7 @@ export function toHtml(folder, story, medias) {
     category: frontmatter['Category'],
     author: frontmatter['Author'],
     title: frontmatter['Title'],
+    parentalRating: parentalRating(frontmatter['Parental Rating']),
     imageLink,
     ttsLink,
     linkGitHub,
@@ -165,7 +180,7 @@ export function getTags(story) {
 
   function split(key) {
     const value = frontmatter[key];
-    return value === null
+    return value == null // intentionally ==, to handle undefined and null
       ? []
       : frontmatter[key]
           .split(',')
@@ -177,7 +192,8 @@ export function getTags(story) {
     split('Story Content'),
     split('Story Genre'),
     split('Coding Level'),
-    split('Coding Ideas')
+    split('Coding Ideas'),
+    split('Parental Rating')
   );
   return tags;
 }
