@@ -60,15 +60,18 @@ function repoStoriesList() {
       }
       const ttsAudio = mediaRead(ttsAudioFileName);
 
+      const fileNamesInStory = fs.readdirSync(path.join(STORIES_ROOT, folder));
+
+      const extNames = functions.unique(fileNamesInStory.map(($) => path.extname($)));
+
       const additionalMedias = Object.fromEntries(
-        fs
-          .readdirSync(path.join(STORIES_ROOT, folder))
+        fileNamesInStory
           .map((fileNameRelative) => {
-            const extname = path.extname(fileNameRelative);
+            const extName = path.extname(fileNameRelative);
             if (fileNameRelative === path.basename(logoImageFileName)) {
               return undefined;
             }
-            if (extname !== '.jpg' && extname !== '.png') {
+            if (extName !== '.jpg' && extName !== '.png') {
               return undefined;
             }
             const fileName = path.join(STORIES_ROOT, folder, fileNameRelative);
@@ -80,7 +83,7 @@ function repoStoriesList() {
       const medias = { logoImage, ttsAudio, ...additionalMedias };
 
       const tags = story.getTags(storyText);
-      const storyHtml = story.toHtml(folder, storyText, medias);
+      const storyHtml = story.toHtml(folder, storyText, extNames, medias);
       fs.writeFileSync(`${storyFileName}.dev.html`, storyHtml);
       return {
         title: folder.replaceAll('_', ' '),

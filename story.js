@@ -47,6 +47,11 @@ const HTML_HEADER = `
 <figure class="wp-block-audio">
     <audio controls src="/wp-content/uploads/{ttsLink}"></audio>
 </figure>
+<style>
+.devicon {
+  height: 1em;
+}
+</style>
 <p>&nbsp;</p>
 `;
 
@@ -64,6 +69,7 @@ const HTML_FOOTER = `
     <tr><th class="has-text-align-center">How To Quote Story</th><td>({author}, adapted by StoryCoder.dev under {storyLicense})</td></tr>
     <tr><th class="has-text-align-center">Picture License</th><td>{imageLicense}</td></tr>
     <tr><th class="has-text-align-center">How to Quote Picture</th><td>(adapted by StoryCoder.dev under {imageLicense})</td></tr>
+    <tr><th class="has-text-align-center">Available Solutions</th><td>{availableSolutions}</td></tr>
     <tr><th class="has-text-align-center">Title</th><td>{title}</td></tr>
     <tr><th class="has-text-align-center">Author</th><td>{author}</td></tr>
     <tr><th class="has-text-align-center">Tags</th><td><!-- wp:post-terms {"term":"post_tag"} /--></td></tr>
@@ -103,11 +109,12 @@ function htmlAdjustSolution(document) {
   });
 }
 
+// images which are uploaded to WordPress are relocated, absolute URLs oder URLs
+// to other external ressources need no adjustment
 function htmlAdjustLinks(document, medias) {
   document.querySelectorAll('img').forEach((node) => {
     const linkCurrent = node.getAttribute('src');
-    // TODO ideally all images are handled identically
-    if (linkCurrent.startsWith('/')) {
+    if (linkCurrent.startsWith('/') || linkCurrent.startsWith('http')) {
       return;
     }
     const linkNew = `/wp-content/uploads/${medias[linkCurrent].link}`;
@@ -135,7 +142,46 @@ function parentalRating(rating) {
   }
 }
 
-export function toHtml(folder, story, medias) {
+const LANGUAGE_DESCRIPTIONS = {
+  '.c': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg" /> C ',
+  '.clj':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/clojure/clojure-original.svg" /> Clojure',
+  '.cpp':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" /> C++',
+  '.cs':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" /> C#',
+  '.dart':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg" /> Dart',
+  '.erl':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/erlang/erlange-original.svg" /> Zig',
+  '.go': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" /> Go',
+  '.hs':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/haskell/haskell-original.svg" /> Haskell',
+  '.js':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" /> JavaScript',
+  '.nim': 'Nim',
+  '.pl': 'Perl',
+  '.pro': 'Prolog',
+  '.py':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" /> Python',
+  '.rb': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg" /> Ruby',
+  '.rs': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-plain.svg" /> Rust',
+  '.swift':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg" /> Swift',
+  '.ts':
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" /> TypeScript',
+  '.zig': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/zig/zig-original.svg" /> Zig'
+};
+
+function availableSolutions(extNames) {
+  return functions
+    .unique(extNames)
+    .map(($) => LANGUAGE_DESCRIPTIONS[$] || '')
+    .filter(Boolean)
+    .join(' - ');
+}
+
+export function toHtml(folder, story, extNames, medias) {
   const imageLink = medias.logoImage.link;
   const ttsLink = medias.ttsAudio.link;
   const options = { html: true };
@@ -159,6 +205,7 @@ export function toHtml(folder, story, medias) {
     author: frontmatter['Author'],
     title: frontmatter['Title'],
     parentalRating: parentalRating(frontmatter['Parental Rating']),
+    availableSolutions: availableSolutions(extNames),
     imageLink,
     ttsLink,
     linkGitHub,
