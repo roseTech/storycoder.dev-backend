@@ -71,7 +71,7 @@ async function post(url, data) {
       method: 'POST'
     };
     const request = https.request(url, options, (response) => {
-      response.on('data', (chunk) => (responseBody += chunk));
+      response.on('data', (chunk) => { responseBody += chunk; });
       response.on('end', () => {
         const body = JSON.parse(responseBody);
         checkReponse(response, body);
@@ -100,7 +100,7 @@ async function postFile(url, title, filename, media) {
       method: 'POST'
     };
     const request = https.request(url, options, (response) => {
-      response.on('data', (chunk) => (responseBody += chunk));
+      response.on('data', (chunk) => { responseBody += chunk; });
       response.on('end', () => {
         checkReponse(response, responseBody);
         resolve([response, responseBody]);
@@ -115,48 +115,44 @@ async function postFile(url, title, filename, media) {
 
 // fetch all stories which are currently available
 export async function postList() {
-  const body = await get(`${URL_POSTS}?per_page=100&page=1`);
-  return body;
+  await get(`${URL_POSTS}?per_page=100&page=1`);
 }
 
 // title: string
 export async function postCreate(title) {
-  const body = await post(URL_POSTS, { title, status: 'publish' });
+  await post(URL_POSTS, { title, status: 'publish' });
 }
 
 // id: integer
 // content: string
 // tags: array of integers
 export async function postUpdate(id, content, tags) {
-  const body = await post(`${URL_POSTS}/${id}`, { content, tags, status: 'publish' });
+  await post(`${URL_POSTS}/${id}`, { content, tags, status: 'publish' });
 }
 
 // https://developer.wordpress.org/rest-api/reference/tags/
 
 export async function tagList() {
-  const body = await getMany(URL_TAGS);
-  return body;
+  return getMany(URL_TAGS);
 }
 
 // name: string
 export async function tagCreate(name) {
-  const body = await post(URL_TAGS, { name });
+  await post(URL_TAGS, { name });
 }
 
 // https://developer.wordpress.org/rest-api/reference/categories/
 
 export async function categoryList() {
-  const body = await get(URL_CATEGORIES);
-  return body;
+  return get(URL_CATEGORIES);
 }
 
 // https://developer.wordpress.org/rest-api/reference/media/
 
 export async function mediaList() {
-  const body = await getMany(URL_MEDIA);
-  return body;
+  return getMany(URL_MEDIA);
 }
 
 export async function mediaCreate(title, filename, media) {
-  const body = await postFile(URL_MEDIA, title, filename, media);
+  return postFile(URL_MEDIA, title, filename, media);
 }
