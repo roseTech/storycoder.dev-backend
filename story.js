@@ -153,7 +153,7 @@ const LANGUAGE_DESCRIPTIONS = {
   '.dart':
     '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg" /> Dart',
   '.erl':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/erlang/erlange-original.svg" /> Zig',
+    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/erlang/erlang-original.svg" /> Erlang',
   '.go': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" /> Go',
   '.hs':
     '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/haskell/haskell-original.svg" /> Haskell',
