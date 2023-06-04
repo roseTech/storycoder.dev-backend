@@ -5,7 +5,8 @@ import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
 import process from 'process';
 import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
-import * as functions from './functions';
+
+import * as functions from './functions.js';
 
 dotenv.config();
 

@@ -1,15 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 
-import * as wp from './wp';
-import * as story from './story';
-import { checksum, unique } from './functions';
+import * as wp from './wp.js';
+import * as story from './story.js';
+import * as functions from './functions.js';
 
 const { STORIES_ROOT } = process.env; // the path were the stories are
 
 function mediaRead(fileName) {
   const content = fs.readFileSync(fileName);
-  const title = checksum(content);
+  const title = functions.checksum(content);
   const link = title + path.extname(fileName);
   return {
     fileName,
@@ -93,7 +93,7 @@ function repoStoriesList() {
 }
 
 async function wpCreateTagsIfNotExist(repoStories) {
-  const repoTags = unique(repoStories.map(($) => $.tags).flat());
+  const repoTags = functions.unique(repoStories.map(($) => $.tags).flat());
   const wpTags = (await wp.tagList()).map(($) => $.name);
   for (const repoTag of repoTags) {
     if (!wpTags.includes(repoTag)) {
