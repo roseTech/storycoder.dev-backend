@@ -1,9 +1,11 @@
 // story conversion functions
 
+import path from 'path';
+import process from 'process';
+
 import { DOMParser } from 'linkedom'; // https://www.npmjs.com/package/linkedom
 import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import MarkdownIt from 'markdown-it'; // https://www.npmjs.com/package/markdown-it
-import process from 'process';
 import YAML from 'yaml'; // https://www.npmjs.com/package/yaml
 
 import * as functions from './functions.js';
@@ -49,7 +51,7 @@ const HTML_HEADER = `
 </figure>
 <style>
 .devicon {
-  height: 1em;
+    height: 1em;
 }
 </style>
 <p>&nbsp;</p>
@@ -142,46 +144,85 @@ function parentalRating(rating) {
   }
 }
 
-const LANGUAGE_DESCRIPTIONS = {
-  '.c': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg" /> C ',
-  '.clj':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/clojure/clojure-original.svg" /> Clojure',
-  '.cpp':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" /> C++',
-  '.cs':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" /> C#',
-  '.dart':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg" /> Dart',
-  '.erl':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/erlang/erlang-original.svg" /> Erlang',
-  '.go': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" /> Go',
-  '.hs':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/haskell/haskell-original.svg" /> Haskell',
-  '.js':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" /> JavaScript',
-  '.nim': 'Nim',
-  '.pl': 'Perl',
-  '.pro': 'Prolog',
-  '.py':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" /> Python',
-  '.rb': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg" /> Ruby',
-  '.rs': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-plain.svg" /> Rust',
-  '.swift':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg" /> Swift',
-  '.ts':
-    '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" /> TypeScript',
-  '.zig': '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/zig/zig-original.svg" /> Zig'
+const LANGUAGES = {
+  '.c': {
+    name: 'C',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg" />'
+  },
+  '.clj': {
+    name: 'Clojure',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/clojure/clojure-original.svg" />'
+  },
+  '.cpp': {
+    name: 'C++',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" />'
+  },
+  '.cs': {
+    name: 'C#',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" />'
+  },
+  '.dart': {
+    name: 'Dart',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dart/dart-original.svg" />'
+  },
+  '.erl': {
+    name: 'Erlang',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/erlang/erlang-original.svg" />'
+  },
+  '.go': {
+    name: 'Go',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg" />'
+  },
+  '.hs': {
+    name: 'Haskell',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/haskell/haskell-original.svg" />'
+  },
+  '.js': {
+    name: 'JavaScript',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" />'
+  },
+  '.nim': { icon: '', name: 'Nim' },
+  '.pl': { icon: '', name: 'Perl' },
+  '.pro': { icon: '', name: 'Prolog' },
+  '.py': {
+    name: 'Python',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" />'
+  },
+  '.rb': {
+    name: 'Ruby',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg" />'
+  },
+  '.rs': {
+    name: 'Rust',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-plain.svg" />'
+  },
+  '.swift': {
+    name: 'Swift',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg" />'
+  },
+  '.ts': {
+    name: 'TypeScript',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" />'
+  },
+  '.zig': {
+    name: 'Zig',
+    icon: '<img class="devicon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/zig/zig-original.svg" />'
+  }
 };
 
-function availableSolutions(extNames) {
-  return functions
-    .unique(extNames)
-    .map(($) => LANGUAGE_DESCRIPTIONS[$] || '')
+function availableSolutions(fileNamesInStory) {
+  const extNames = functions.unique(fileNamesInStory.map(($) => path.extname($)));
+  return extNames
+    .map(($) => {
+      if (LANGUAGES[$] !== undefined) {
+        return LANGUAGES[$].name + ' ' + LANGUAGES[$].icon;
+      }
+    })
     .filter(Boolean)
     .join(' - ');
 }
 
-export function toHtml(folder, story, extNames, medias) {
+export function toHtml(folder, story, fileNamesInStory, medias) {
   const imageLink = medias.logoImage.link;
   const ttsLink = medias.ttsAudio.link;
   const options = { html: true };
@@ -205,7 +246,7 @@ export function toHtml(folder, story, extNames, medias) {
     author: frontmatter['Author'],
     title: frontmatter['Title'],
     parentalRating: parentalRating(frontmatter['Parental Rating']),
-    availableSolutions: availableSolutions(extNames),
+    availableSolutions: availableSolutions(fileNamesInStory),
     imageLink,
     ttsLink,
     linkGitHub,
@@ -222,8 +263,15 @@ export function toHtml(folder, story, extNames, medias) {
   return document.documentElement.innerHTML;
 }
 
-export function getTags(story) {
+export function getTags(story, fileNamesInStory) {
   const [frontmatter, _] = documentSplit(story);
+  const extNames = functions.unique(fileNamesInStory.map(($) => path.extname($)));
+  const hasSolutions = Object.entries(LANGUAGES)
+    .filter(([key, value]) => extNames.includes(key))
+    .map(([key, value]) => value.name.toLocaleLowerCase());
+  const noSolutions = Object.entries(LANGUAGES)
+    .filter(([key, value]) => !extNames.includes(key))
+    .map(([key, value]) => 'no-' + value.name.toLocaleLowerCase());
 
   function split(key) {
     const value = frontmatter[key];
@@ -234,13 +282,16 @@ export function getTags(story) {
           .map(($) => $.trim().toLowerCase())
           .filter(($) => $.length > 1);
   }
+
   const tags = [].concat(
     split('Category'),
     split('Story Content'),
     split('Story Genre'),
     split('Coding Level'),
     split('Coding Ideas'),
-    split('Parental Rating')
+    split('Parental Rating'),
+    hasSolutions,
+    noSolutions
   );
   return tags;
 }

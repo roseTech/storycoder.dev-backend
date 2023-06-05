@@ -20,7 +20,7 @@ function mediaRead(fileName) {
 }
 
 // go through all stories in the repository a create HTML out of it. This HTML
-// later can be used to upload to e.g. wordpress.
+// later can be used to upload to WordPress.
 function repoStoriesList() {
   return fs
     .readdirSync(STORIES_ROOT)
@@ -62,8 +62,6 @@ function repoStoriesList() {
 
       const fileNamesInStory = fs.readdirSync(path.join(STORIES_ROOT, folder));
 
-      const extNames = functions.unique(fileNamesInStory.map(($) => path.extname($)));
-
       const additionalMedias = Object.fromEntries(
         fileNamesInStory
           .map((fileNameRelative) => {
@@ -82,8 +80,8 @@ function repoStoriesList() {
 
       const medias = { logoImage, ttsAudio, ...additionalMedias };
 
-      const tags = story.getTags(storyText);
-      const storyHtml = story.toHtml(folder, storyText, extNames, medias);
+      const tags = story.getTags(storyText, fileNamesInStory);
+      const storyHtml = story.toHtml(folder, storyText, fileNamesInStory, medias);
       fs.writeFileSync(`${storyFileName}.dev.html`, storyHtml);
       return {
         title: folder.replaceAll('_', ' '),
