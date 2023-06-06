@@ -4,7 +4,7 @@ import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
 import FormData from 'form-data'; // https://www.npmjs.com/package/form-data
 import https from 'https';
 import process from 'process';
-import http2 from 'http2';
+import { constants as HttpConstants } from 'http2';
 
 dotenv.config();
 
@@ -17,8 +17,8 @@ const URL_CATEGORIES = `${URL}/wp-json/wp/v2/categories`;
 const URL_MEDIA = `${URL}/wp-json/wp/v2/media`;
 
 function checkReponse(response, body) {
-  const isOk = response.statusCode === http2.constants.HTTP_STATUS_OK;
-  const isCreated = response.statusCode === http2.constants.HTTP_STATUS_CREATED;
+  const isOk = response.statusCode === HttpConstants.HTTP_STATUS_OK;
+  const isCreated = response.statusCode === HttpConstants.HTTP_STATUS_CREATED;
   if (!(isOk || isCreated)) {
     throw Error(`Invalid Response ${response.statusCode} ${JSON.stringify(body)}`);
   }
@@ -71,7 +71,9 @@ async function post(url, data) {
       method: 'POST'
     };
     const request = https.request(url, options, (response) => {
-      response.on('data', (chunk) => { responseBody += chunk; });
+      response.on('data', (chunk) => {
+        responseBody += chunk;
+      });
       response.on('end', () => {
         const body = JSON.parse(responseBody);
         checkReponse(response, body);
@@ -100,7 +102,9 @@ async function postFile(url, title, filename, media) {
       method: 'POST'
     };
     const request = https.request(url, options, (response) => {
-      response.on('data', (chunk) => { responseBody += chunk; });
+      response.on('data', (chunk) => {
+        responseBody += chunk;
+      });
       response.on('end', () => {
         checkReponse(response, responseBody);
         resolve([response, responseBody]);
