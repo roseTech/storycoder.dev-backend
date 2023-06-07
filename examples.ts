@@ -1,11 +1,13 @@
 // just short examples for every used library
 
 import process from 'process';
-import dotenv from 'dotenv'; // https://www.npmjs.com/package/dotenv
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml'; // https://www.npmjs.com/package/yaml
+import dotenv from 'dotenv';
+import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import got from 'got'; // https://github.com/sindresorhus/got/issues/2267
 import MarkdownIt from 'markdown-it';
 import { readFileSync } from 'fs';
+
+// had to disable it due to incompatibility with moduleResolution option. See issue above.
 // eslint-disable-next-line import/extensions
 import { TestTypes } from '@examples/enums/TestTypes.enum.js';
 import assert from 'assert';
@@ -94,6 +96,7 @@ function markdownParserExample(): void {
   printTestHeader(TestTypes.MD);
 
   const exampleMarkdown = readFileSync('./files_for_examples/md/example.md', 'utf8');
+
   // Enable HTML tags in source
   const options = { html: true };
   const md = new MarkdownIt(options);
@@ -119,7 +122,7 @@ function exampleLinkeDOM(): void {
 
   const document = new DOMParser().parseFromString(exampleHtml, 'text/html');
 
-  // // replace text nodes
+  // replace text nodes
   const paragraphs = document.querySelectorAll('p');
   assert(paragraphs != null, "❌ paragraphs don't exist!");
 
