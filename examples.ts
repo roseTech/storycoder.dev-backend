@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 
 // had to disable it due to incompatibility with moduleResolution option. See issue above.
 // eslint-disable-next-line import/extensions
-import { TestTypes } from '@examples/enums/TestTypes.enum.js';
+import { ExamplesTypes } from '@examples/enums/ExamplesTypes.enum.js';
 import assert from 'assert';
 import { DOMParser } from 'linkedom';
 import FormData from 'form-data';
@@ -19,14 +19,14 @@ import { constants as HttpConstants } from 'http2';
 // LOGGERS
 // ///////////////////////
 
-function printTestHeader(exampleType: TestTypes): void {
+function printTestHeader(exampleType: ExamplesTypes): void {
   console.log('\n');
   console.log('// ///////////////////////');
   console.log(`// ${exampleType} TEST`);
   console.log('// ///////////////////////');
 }
 
-function printTestFooter(exampleType: TestTypes): void {
+function printTestFooter(exampleType: ExamplesTypes): void {
   console.log(`✅  ${exampleType} PASSED`);
 }
 
@@ -34,7 +34,7 @@ function printTestFooter(exampleType: TestTypes): void {
 // ACTUAL TESTS
 // ///////////////////////
 async function httpExample(): Promise<void> {
-  printTestHeader(TestTypes.HTTP_REQUEST);
+  printTestHeader(ExamplesTypes.HTTP_REQUEST);
 
   // GET /plugins is an endpoint which requires authentication. If this request returns 401, credentials
   // in .env file are invalid
@@ -49,11 +49,11 @@ async function httpExample(): Promise<void> {
   assert(plugins.length, '❌  Plugins are not fetched!');
 
   console.log('✔️  Http request properly fetched');
-  printTestFooter(TestTypes.HTTP_REQUEST);
+  printTestFooter(ExamplesTypes.HTTP_REQUEST);
 }
 
 function dotenvExample(): void {
-  printTestHeader(TestTypes.DOTENV_CONFIG);
+  printTestHeader(ExamplesTypes.DOTENV_CONFIG);
 
   const getEnvironmentValue = (envPropertyKey: string): void => {
     const valueFromEnv: string | undefined = process.env[envPropertyKey];
@@ -67,11 +67,11 @@ function dotenvExample(): void {
   getEnvironmentValue('WP_URL');
   getEnvironmentValue('STORIES_ROOT');
 
-  printTestFooter(TestTypes.DOTENV_CONFIG);
+  printTestFooter(ExamplesTypes.DOTENV_CONFIG);
 }
 
 function yamlParserExample(): void {
-  printTestHeader(TestTypes.YAML);
+  printTestHeader(ExamplesTypes.YAML);
 
   const firstYaml = readFileSync('./files_for_examples/yaml/first_example.yaml', 'utf8');
   const firstParsedYaml = yamlParse(firstYaml);
@@ -89,11 +89,11 @@ function yamlParserExample(): void {
   );
   console.log('✔️  Second yaml parsed properly');
 
-  printTestFooter(TestTypes.YAML);
+  printTestFooter(ExamplesTypes.YAML);
 }
 
 function markdownParserExample(): void {
-  printTestHeader(TestTypes.MD);
+  printTestHeader(ExamplesTypes.MD);
 
   const exampleMarkdown = readFileSync('./files_for_examples/md/example.md', 'utf8');
 
@@ -109,11 +109,11 @@ function markdownParserExample(): void {
   );
   console.log('✔️  Markdown parsed properly');
 
-  printTestFooter(TestTypes.MD);
+  printTestFooter(ExamplesTypes.MD);
 }
 
 function exampleLinkeDOM(): void {
-  printTestHeader(TestTypes.LINKEDOM);
+  printTestHeader(ExamplesTypes.LINKEDOM);
 
   const exampleHtml = readFileSync('./files_for_examples/html/example.html', 'utf8');
 
@@ -160,11 +160,11 @@ function exampleLinkeDOM(): void {
   );
   console.log('✔️  HTML properly parsed');
 
-  printTestFooter(TestTypes.LINKEDOM);
+  printTestFooter(ExamplesTypes.LINKEDOM);
 }
 
 function exampleFormData(): void {
-  printTestHeader(TestTypes.FORM_DATA);
+  printTestHeader(ExamplesTypes.FORM_DATA);
   const form = new FormData();
   form.append('title', 'Hello World');
   form.append('x', 'this is x');
@@ -194,7 +194,7 @@ function exampleFormData(): void {
   );
   console.log('✔️  y field properly set');
 
-  printTestFooter(TestTypes.FORM_DATA);
+  printTestFooter(ExamplesTypes.FORM_DATA);
 }
 
 dotenvExample();

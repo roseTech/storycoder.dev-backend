@@ -1,4 +1,4 @@
-export const enum TestTypes {
+export const enum ExamplesTypes {
   HTTP_REQUEST = 'HTTP REQUEST',
   DOTENV_CONFIG = 'DOTENV CONFIG',
   YAML = 'YAML PARSER',
