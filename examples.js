@@ -1,39 +1,48 @@
 // just short examples for every used library
 
-import process from 'process';
 import dotenv from 'dotenv';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import got from 'got'; // https://github.com/sindresorhus/got/issues/2267
 import MarkdownIt from 'markdown-it';
 import { readFileSync } from 'fs';
-
-// had to disable it due to incompatibility with moduleResolution option. See issue above.
-// eslint-disable-next-line import/extensions
-import { ExamplesTypes } from '@examples/enums/ExamplesTypes.enum.js';
 import assert from 'assert';
 import { DOMParser } from 'linkedom';
 import FormData from 'form-data';
 import { constants as HttpConstants } from 'http2';
+// eslint-disable-next-line import/no-unresolved
+import got from 'got';
+// eslint-disable-next-line import/extensions
+import { ExamplesTypes } from './files_for_examples/enums/ExamplesTypes.js';
 
 // ///////////////////////
 // LOGGERS
 // ///////////////////////
 
-function printTestHeader(exampleType: ExamplesTypes): void {
+/**
+ * @param {string} exampleType
+ * @returns {void}
+ */
+function printTestHeader(exampleType) {
   console.log('\n');
   console.log('// ///////////////////////');
   console.log(`// ${exampleType} TEST`);
   console.log('// ///////////////////////');
 }
 
-function printTestFooter(exampleType: ExamplesTypes): void {
+/**
+ * @param {string} exampleType
+ * @returns {void}
+ */
+function printTestFooter(exampleType) {
   console.log(`✅  ${exampleType} PASSED`);
 }
 
 // ///////////////////////
 // ACTUAL TESTS
 // ///////////////////////
-async function httpExample(): Promise<void> {
+/**
+ * @returns {Promise<void>}
+ */
+async function httpExample() {
   printTestHeader(ExamplesTypes.HTTP_REQUEST);
 
   // GET /plugins is an endpoint which requires authentication. If this request returns 401, credentials
@@ -44,7 +53,7 @@ async function httpExample(): Promise<void> {
     responseType: 'json'
   });
 
-  const plugins = response.body as Array<{ name: string }>;
+  const plugins = response.body; // body is of type Array<{ name: string }>
   assert(response.statusCode === HttpConstants.HTTP_STATUS_OK, '❌  HTTP Request failed!');
   assert(plugins.length, '❌  Plugins are not fetched!');
 
@@ -52,11 +61,14 @@ async function httpExample(): Promise<void> {
   printTestFooter(ExamplesTypes.HTTP_REQUEST);
 }
 
-function dotenvExample(): void {
+/**
+ * @returns {void}
+ */
+function dotenvExample() {
   printTestHeader(ExamplesTypes.DOTENV_CONFIG);
 
-  const getEnvironmentValue = (envPropertyKey: string): void => {
-    const valueFromEnv: string | undefined = process.env[envPropertyKey];
+  const getEnvironmentValue = (envPropertyKey) => {
+    const valueFromEnv = process.env[envPropertyKey]; // string or undefined if not set properly
     assert(valueFromEnv != null, `❌  ${envPropertyKey} is missing!`);
     console.log(`✔️  Value for ${envPropertyKey} has been set. Check twice if set value is correct.`);
   };
@@ -70,7 +82,10 @@ function dotenvExample(): void {
   printTestFooter(ExamplesTypes.DOTENV_CONFIG);
 }
 
-function yamlParserExample(): void {
+/**
+ * @returns {void}
+ */
+function yamlParserExample() {
   printTestHeader(ExamplesTypes.YAML);
 
   const firstYaml = readFileSync('./files_for_examples/yaml/first_example.yaml', 'utf8');
@@ -92,7 +107,10 @@ function yamlParserExample(): void {
   printTestFooter(ExamplesTypes.YAML);
 }
 
-function markdownParserExample(): void {
+/**
+ * @returns {void}
+ */
+function markdownParserExample() {
   printTestHeader(ExamplesTypes.MD);
 
   const exampleMarkdown = readFileSync('./files_for_examples/md/example.md', 'utf8');
@@ -112,7 +130,10 @@ function markdownParserExample(): void {
   printTestFooter(ExamplesTypes.MD);
 }
 
-function exampleLinkeDOM(): void {
+/**
+ * @returns {void}
+ */
+function exampleLinkeDOM() {
   printTestHeader(ExamplesTypes.LINKEDOM);
 
   const exampleHtml = readFileSync('./files_for_examples/html/example.html', 'utf8');
@@ -126,8 +147,10 @@ function exampleLinkeDOM(): void {
   const paragraphs = document.querySelectorAll('p');
   assert(paragraphs != null, "❌ paragraphs don't exist!");
 
-  paragraphs.forEach((paragraph: HTMLParagraphElement) => {
-    paragraph.childNodes.forEach((node: ChildNode) => {
+  // paragraph is of type HTMLParagraphElement
+  paragraphs.forEach((paragraph) => {
+    // node is of type ChildNode
+    paragraph.childNodes.forEach((node) => {
       if (node.nodeType === TEXT_NODE) {
         // eslint-disable-next-line no-param-reassign
         node.textContent = `[${node.textContent}]`;
@@ -163,7 +186,10 @@ function exampleLinkeDOM(): void {
   printTestFooter(ExamplesTypes.LINKEDOM);
 }
 
-function exampleFormData(): void {
+/**
+ * @returns {void}
+ */
+function exampleFormData() {
   printTestHeader(ExamplesTypes.FORM_DATA);
   const form = new FormData();
   form.append('title', 'Hello World');
@@ -197,9 +223,16 @@ function exampleFormData(): void {
   printTestFooter(ExamplesTypes.FORM_DATA);
 }
 
-dotenvExample();
-await httpExample();
-yamlParserExample();
-markdownParserExample();
-exampleLinkeDOM();
-exampleFormData();
+/**
+ * @returns {Promise<void>}
+ */
+const runExamples = async () => {
+  dotenvExample();
+  await httpExample();
+  yamlParserExample();
+  markdownParserExample();
+  exampleLinkeDOM();
+  exampleFormData();
+};
+
+runExamples().then(() => console.log('\n✅ ✅ ✅  ALL ENTITIES PASSED TESTS! ✅ ✅ ✅ '));
