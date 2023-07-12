@@ -1,5 +1,6 @@
 // just short examples for every used library
 
+import process from 'process';
 import dotenv from 'dotenv';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import MarkdownIt from 'markdown-it';
