@@ -1,6 +1,5 @@
 // just short examples for every used library
 
-import process from 'process';
 import dotenv from 'dotenv';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import MarkdownIt from 'markdown-it';
@@ -68,12 +67,14 @@ async function httpExample() {
 function dotenvExample() {
   printTestHeader(ExamplesTypes.DOTENV_CONFIG);
 
+  dotenv.config();
+  console.log(process.env.WP_API_USERNAME);
+
   const getEnvironmentValue = (envPropertyKey) => {
     const valueFromEnv = process.env[envPropertyKey]; // string or undefined if not set properly
     assert(valueFromEnv != null, `❌  ${envPropertyKey} is missing!`);
     console.log(`✔️  Value for ${envPropertyKey} has been set. Check twice if set value is correct.`);
   };
-  dotenv.config();
 
   getEnvironmentValue('WP_API_USERNAME');
   getEnvironmentValue('WP_API_PASSWORD');
