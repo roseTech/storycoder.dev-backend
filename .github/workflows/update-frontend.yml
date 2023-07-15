@@ -34,7 +34,7 @@ jobs:
         run: npm run update
         if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         env:
-          WP_URL: https://storycoder.dev
-          WP_API_USERNAME: ${{ secrets.WP_API_USERNAME }}
+          WP_URL: ${{ vars.WP_URL }}
+          WP_API_USERNAME: ${{ vars.WP_API_USERNAME }}
           WP_API_PASSWORD: ${{ secrets.WP_API_PASSWORD}}
-          STORIES_ROOT: storycoder.dev
+          STORIES_ROOT: ${{ vars.STORIES_ROOT }}
