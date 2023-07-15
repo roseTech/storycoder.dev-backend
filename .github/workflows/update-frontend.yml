@@ -26,6 +26,12 @@ jobs:
         run: npm clean-install
       - name: run examples
         run: npm run examples
+        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
+        env:
+          WP_URL: ${{ vars.WP_URL }}
+          WP_API_USERNAME: ${{ vars.WP_API_USERNAME }}
+          WP_API_PASSWORD: ${{ secrets.WP_API_PASSWORD}}
+          STORIES_ROOT: ${{ vars.STORIES_ROOT }}
       - name: check for new commits
         working-directory: storycoder.dev
         run: |
