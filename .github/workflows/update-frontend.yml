@@ -26,7 +26,6 @@ jobs:
         run: npm clean-install
       - name: run examples
         run: npm run examples
-        if: ${{ env.NEW_COMMIT_COUNT > 0 }}
         env:
           WP_URL: ${{ vars.WP_URL }}
           WP_API_USERNAME: ${{ vars.WP_API_USERNAME }}
