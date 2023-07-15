@@ -8,6 +8,7 @@ on:
     - cron: "0 4 * * *"
 
 env:
+  # todo: migrate non-critical variables from repository secrets to repository variables
   WP_URL: ${{ vars.WP_URL || 'https://storycoder.dev' }}
   WP_API_USERNAME: ${{ vars.WP_API_USERNAME || secrets.WP_API_USERNAME }}
   WP_API_PASSWORD: ${{ secrets.WP_API_PASSWORD}}
@@ -40,8 +41,3 @@ jobs:
       - name: run update
         run: npm run update
         if: ${{ env.NEW_COMMIT_COUNT > 0 }}
-        env:
-          WP_URL: ${{ vars.WP_URL }}
-          WP_API_USERNAME: ${{ vars.WP_API_USERNAME }}
-          WP_API_PASSWORD: ${{ secrets.WP_API_PASSWORD}}
-          STORIES_ROOT: ${{ vars.STORIES_ROOT }}
