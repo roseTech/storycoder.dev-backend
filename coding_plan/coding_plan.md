@@ -68,6 +68,8 @@ This is our coding plan for StoryCoder.dev. This plan was made with the help of 
 - [ ] add search-enginge-optimizations
 ### Tracking
 - [ ] avoid tracking; if tracking is necessary, add cooky disclaimer and stay within legal limits
+### Gamification
+- [ ] Gamification options
 ### Entities needed: 
 - Webserver, user inputs,
 
