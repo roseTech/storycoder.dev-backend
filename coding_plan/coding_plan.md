@@ -61,7 +61,8 @@ This is our coding plan for StoryCoder.dev. This plan was made with the help of 
 - [ ] Footer which is visible on all posts/stories
 
 ## Future features: Features not yet added, but planned to be added 
-- features taken from our open task list on https://github.com/roseTech/storycoder.dev/blob/main/Open-Tasks.md
+### features taken from our open task list on 
+- https://github.com/roseTech/storycoder.dev/blob/main/Open-Tasks.md
 ### Categorizations and tags 
 - [ ] Add a story rating system, but instead of regular god/bad, use a sentiment system (story was funny, story made me sad, ...)
 ### SEO
