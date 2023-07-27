@@ -32,7 +32,7 @@ This is our coding plan for StoryCoder.dev. This plan was made with the help of 
 - The subsite https://storycoder.dev/stories runs with wordpress blogposts, fetched from stories stored on https://github.com/roseTech/storycoder.dev.
 ## New changes/ planning: 
 - Coding: We want to redo the subsite "stories", go away from wordpress for this particular subsite, code it and store it on https://github.com/roseTech/storycoder.dev-backend to be able to programme new features. The new subsite will be running on https://stories.practicecoding.dev.
-- Both story sections, the current one on wordpress (https://storycoder.dev/stories) and the planned one on (https://stories.practicecoding.dev) will run parallel until the final coded version will be in production. 
+- Both story sections, the current one on wordpress (https://storycoder.dev/stories) and the planned one on (https://stories.storycoder.dev) will run parallel until the final coded version on (https://stories.storycoder.dev) will be in production. 
 - The test site will be: https://stories.practicecoding.dev
 - The other parts of the website will still be running on wordpress with the “astra theme” and will follow at a later stage (step by step).
 
