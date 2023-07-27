@@ -67,4 +67,14 @@ What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone
 ### Tracking
 - [ ] avoid tracking; if tracking is necessary, add cooky disclaimer and stay within legal limits
 ### Entities needed: 
-- Webserver, user inputs, 
+- Webserver, user inputs,
+
+# 5. Map the project architecture
+- flowchart of our final project, sticky notes or digitally
+- how will a user progress through your different program features?
+- branching paths, decision points in your program. Also, write which entities are involved in each feature within the feature box. This flowchart will act as a blueprint for your program’s structure.
+
+Once you have your flowchart, write different types of inputs that a user might do in different colored boxes. Trace each input through the program and see which points it touches as it progresses through the program. Document these. If you find an unsupported input, create the features needed to handle it.
+
+Here’s an example of a program flowchart:
+
