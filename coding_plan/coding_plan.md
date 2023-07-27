@@ -59,7 +59,8 @@ What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone
 - [ ] Allow filtering for tags
 - [ ] Footer which is visible on all posts/stories
 
-## Future features: Features not yet added, but planned to be added (features taken from our open task list on https://github.com/roseTech/storycoder.dev/commit/b66e40eacaaadb194e191d3264fde1e22dc4d124 
+## Future features: Features not yet added, but planned to be added 
+- features taken from our open task list on https://github.com/roseTech/storycoder.dev/commit/b66e40eacaaadb194e191d3264fde1e22dc4d124 
 ### Categorization and tags
 - [ ] Add a story rating system, but instead of regular god/bad, use a sentiment system (story was funny, story made me sad, ...)
 ### SEO
