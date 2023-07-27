@@ -14,7 +14,8 @@ This is our coding plan for StoryCoder.dev. This plan was made with the help of 
 ### 8. Make a schedule
 
 # 1. Decide on your project
-What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone, writers and coders, can contribute. The project consists of writing stories of all genres (comedy, action, detective, love stories, drama, fairy tales, fiction, historical, children’s stories, etc.). Somewhere in the story there is a code to solve which can be solved in all programming languages you know, for example Dart, Python, C#, C++, JavaScript, TypeScript, Swift, Java, Ruby, Erlang, Rust and many more! The aim is to create stories with the respective coding solutions.
+- What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone, writers and coders, can contribute. The project consists of writing stories of all genres (comedy, action, detective, love stories, drama, fairy tales, fiction, historical, children’s stories, etc.).
+- Somewhere in the story there is a code to solve which can be solved in all programming languages you know, for example Dart, Python, C#, C++, JavaScript, TypeScript, Swift, Java, Ruby, Erlang, Rust and many more! The aim is to create stories with the respective coding solutions.
 
 # 2. Check online for similar projects
 - https://shortstoryproject.com/#
@@ -26,7 +27,7 @@ What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone
 - Further? 
 
 # 3. Choose your language and tools
-### Status right now: 
+## Status right now: 
 - Wordpress: StoryCoder.dev (https://storycoder.dev/) runs with Wordpress with the Astra Theme.
 - The subsite https://storycoder.dev/stories runs with wordpress blogposts, fetched from stories stored on https://github.com/roseTech/storycoder.dev.
 ## New changes/ planning: 
@@ -35,7 +36,7 @@ What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone
 - The test site will be: https://stories.practicecoding.dev
 - The other parts of the website will still be running on wordpress with the “astra theme” and will follow at a later stage (step by step).
 
-### Brainstorming Coding Languages: Open Questions
+## Coding Languages: Open Questions ? Brainstorming 
 - Web Applications: JavaScript or TypeScript: Which one? HTML/CSS, 
 - software framework: Angular (JS), React (JS)Node.js (JS) : Which one?
 - Static or dynamic website?: In case static website: What about the dynamic features (such as hashed solution input fields, further interactive gamification features?) 
