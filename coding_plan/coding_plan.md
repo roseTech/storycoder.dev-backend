@@ -76,6 +76,8 @@ What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone
 - document touching points. If you find an unsupported input, create the features needed to handle it.
 
 # 6. Mark entities for setup
-- set up entities that must be set up and what tool you’ll need. You can always change this medium later. For now, just put the first applicable tool that comes to mind as a default plan.
+- set up entities and tools, webservers
 
-For example, a website project would have a site server as an entity. You’ll have to set up this server outside of the program before you can use it. You decide you’ll use a virtual server to keep things simple. With a quick web search, you decide that Apache would allow you to do that. You write down Apache on the webserver entity and mark “access of virtual server” as an essential feature.
+
+
+
