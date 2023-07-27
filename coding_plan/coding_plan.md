@@ -85,18 +85,11 @@ What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone
 - research about features, tools
 
 # 8. Make a schedule
-- set deadlines to complete each feature. Set the most essential feature first, then features that connect to that, and so on. Eventually, you’ll have a timeline for all essential features. If you have any nonessential features, include them on the schedule after the final essential feature.
-
-Make sure these deadlines are from reasonable but not overly generous time estimations based on the complexity of each feature. It’s important to make these distinct dates for each part so you can stay on track and divide the work across a manageable period.
-
-Put them in your calendar and set reminders to increase personal accountability. Also, set apart a regular designated project work time each week. You’ll find it easier to make progress if you make it a routine.
-
-A schedule will also ensure that you know what feature you’ll work on next. This certainty allows you to avoid decisions during your work time. If you have time to work on the project, you can just check the schedule and work on the next part. No consideration is needed!
-
-    Accountability: Tell a friend
-
-    If you’re worried about keeping your schedule, tell a friend, coworker, or peer about your completion goals. Many people find it easier to stick to deadlines if others will know if they miss it. Some developers even livestream their project work online to keep themselves accountable to their deadlines.
-
-
-
-
+- set deadlines to complete each feature
+- most essential feature first, then features that connect to that, and so on
+- Last:  nonessential features, 
+- reasonable time estimations based on the complexity of each feature
+- distinct dates: divide the work across a manageable period
+- set apart project work time, routine, set reminders
+- split work, accountability
+- order of next steps clear
