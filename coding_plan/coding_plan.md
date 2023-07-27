@@ -27,7 +27,7 @@ What is StoryCoder.dev? StoryCoder.dev is an Open Source Project to which anyone
 
 # 3. Choose your language and tools
 ### Status right now: 
-- StoryCoder.dev(https://storycoder.dev/) runs with Wordpress with the Astra Theme.
+- Wordpres StoryCoder.dev (https://storycoder.dev/) runs with Wordpress with the Astra Theme.
 - The subsite https://storycoder.dev/stories runs with wordpress blogposts, fetched from stories stored on https://github.com/roseTech/storycoder.dev. 
 ### New changes/ planning: 
 - We want to code the story section and store it on https://github.com/roseTech/storycoder.dev-backend to be able to programme new features. The new subsite will be running on https://stories.practicecoding.dev.
