@@ -36,10 +36,24 @@ This is our coding plan for StoryCoder.dev. This plan was made with the help of 
 - The test site will be: https://stories.practicecoding.dev
 - The other parts of the website will still be running on wordpress with the “astra theme” and will follow at a later stage (step by step).
 
-## Coding Languages: Open Questions ? Brainstorming 
-- Web Applications: JavaScript or TypeScript: Which one? HTML/CSS, 
-- software framework: Angular (JS), React (JS)Node.js (JS) : Which one?
-- Static or dynamic website?: In case static website: What about the dynamic features (such as hashed solution input fields, further interactive gamification features?) 
+## Coding Languages and Steps:
+1)  Front end and UX: Design a nice page first how a story page should look like (see here a current wordpress story page: https://storycoder.dev/erin-the-pangolin/) with figma,html, css
+  here
+2) Research, evaluate and choose static site generator and
+   coding language. Code draft, test draft, put in production.
+   
+## Open Questions? and Brainstorming:
+1) Which static site generator should we use and why?
+   Name pro's and con's:
+  - Svelte Kit with TypeScript: 
+  - Jekyll with JavaScript:
+  - Comparison between Svelte Kit and Jekyll:
+    https://bejamas.io/compare/jekyll-vs-sveltekit/
+    https://programmingpercy.tech/blog/rebuilt-jekyll-blog-with-sveltekit/
+- Other site generators? 
+    
+2) How shall we implement dynamic features? (such as hashed solution input fields, further interactive gamification features?) 
+
 
 # 4. List all features and entities 
 ### Current Essential features: see this example of a wordpress blog post: https://storycoder.dev/erin-the-pangolin/
